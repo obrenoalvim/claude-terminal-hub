@@ -43,6 +43,12 @@ npm run dist
 
 The resulting `dist/Claude Terminal Hub Setup <version>.exe` is the file to hand out; everything else under `dist/` is intermediate build output.
 
+## Releasing updates
+
+The installed app checks GitHub Releases for a newer version on startup (`electron-updater`) and offers to restart and install it once downloaded — no manual reinstall needed after the first install.
+
+To publish a release: bump `version` in `package.json`, then run `npm run release` with a [`GH_TOKEN`](https://github.com/settings/tokens) (repo scope) in the environment. That builds the installer and uploads it plus the update metadata (`latest.yml`) to a new GitHub Release for the current tag. `npm run dist` (no token needed) builds locally without publishing.
+
 ## Architecture
 
 - **Main process** (`src/main`) — owns the real work: `sessions.js` scans `~/.claude/projects` for session metadata, `pty-manager.js` owns the `node-pty` processes (one per open pane), `index.js` wires both up to `ipcMain` handlers and creates the window.
@@ -101,6 +107,12 @@ npm run dist
 ```
 
 O arquivo `dist/Claude Terminal Hub Setup <versão>.exe` é o que se distribui; o resto dentro de `dist/` é build intermediário.
+
+### Publicando atualizações
+
+O app instalado verifica os GitHub Releases atrás de uma versão nova ao abrir (`electron-updater`) e oferece reiniciar pra instalar assim que baixa — sem precisar reinstalar na mão depois da primeira vez.
+
+Pra publicar uma release: sobe o `version` no `package.json`, depois roda `npm run release` com um [`GH_TOKEN`](https://github.com/settings/tokens) (escopo `repo`) no ambiente. Isso builda o instalador e sobe ele mais o metadado de atualização (`latest.yml`) numa GitHub Release nova pra tag atual. `npm run dist` (sem token) builda local sem publicar.
 
 ### Arquitetura
 

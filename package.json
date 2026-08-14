@@ -4,12 +4,17 @@
   "private": true,
   "description": "Desktop app that lists and resumes your recent Claude Code sessions across every project, in up to 4 real terminal panes",
   "main": "./out/main/index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/obrenoalvim/claude-terminal-hub.git"
+  },
   "scripts": {
     "dev": "electron-vite dev",
     "build": "electron-vite build",
     "start": "electron-vite preview",
     "icon": "node scripts/build-icon.mjs",
-    "dist": "electron-vite build && electron-builder --win",
+    "dist": "electron-vite build && electron-builder --win --publish never",
+    "release": "electron-vite build && electron-builder --win --publish always",
     "lint": "eslint ."
   },
   "build": {
@@ -31,11 +36,17 @@
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "obrenoalvim",
+      "repo": "claude-terminal-hub"
     }
   },
   "dependencies": {
     "@xterm/addon-fit": "^0.11.0",
     "@xterm/xterm": "^6.0.0",
+    "electron-updater": "^6.8.9",
     "node-pty": "^1.0.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"

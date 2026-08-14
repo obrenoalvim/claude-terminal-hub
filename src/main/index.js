@@ -1,5 +1,6 @@
 import { join } from 'node:path';
-import { app, BrowserWindow, ipcMain } from 'electron';
+import { app, BrowserWindow, dialog, ipcMain } from 'electron';
+import { autoUpdater } from 'electron-updater';
 import { listSessions } from './sessions.js';
 import { startPty, writeToPty, resizePty, killPty, killAllPtys } from './pty-manager.js';
 
@@ -45,7 +46,25 @@ function createWindow() {
   win.on('closed', killAllPtys);
 }
 
-app.whenReady().then(createWindow);
+autoUpdater.on('update-downloaded', (info) => {
+  dialog
+    .showMessageBox({
+      type: 'info',
+      title: 'Atualização disponível',
+      message: `Claude Terminal Hub ${info.version} foi baixado. Reiniciar agora para instalar?`,
+      buttons: ['Reiniciar agora', 'Depois'],
+      defaultId: 0,
+      cancelId: 1,
+    })
+    .then(({ response }) => {
+      if (response === 0) autoUpdater.quitAndInstall();
+    });
+});
+
+app.whenReady().then(() => {
+  createWindow();
+  if (app.isPackaged) autoUpdater.checkForUpdates();
+});
 
 app.on('window-all-closed', () => {
   killAllPtys();
