@@ -1,6 +1,7 @@
 import os from 'node:os';
 import fs from 'node:fs';
 import pty from 'node-pty';
+import log from 'electron-log/main';
 
 const SHELL = process.platform === 'win32' ? 'powershell.exe' : (process.env.SHELL || 'bash');
 
@@ -30,13 +31,21 @@ export function startPty(paneId, { cwd, cols, rows, command, shell }, onData, on
   if (ptys.has(paneId)) return;
 
   const resolvedCwd = cwd && fs.existsSync(cwd) ? cwd : os.homedir();
-  const term = pty.spawn(resolveShell(shell), [], {
-    name: 'xterm-256color',
-    cols: cols || 80,
-    rows: rows || 24,
-    cwd: resolvedCwd,
-    env: process.env,
-  });
+  let term;
+  try {
+    term = pty.spawn(resolveShell(shell), [], {
+      name: 'xterm-256color',
+      cols: cols || 80,
+      rows: rows || 24,
+      cwd: resolvedCwd,
+      env: process.env,
+    });
+  } catch (err) {
+    log.error(`Failed to spawn shell for pane ${paneId}`, err);
+    onData(`\r\n[erro ao iniciar shell: ${err.message}]\r\n`);
+    onExit();
+    return;
+  }
 
   term.onData((data) => onData(data));
   term.onExit(() => {

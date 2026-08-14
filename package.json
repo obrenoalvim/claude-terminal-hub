@@ -3,6 +3,7 @@
   "version": "0.3.1",
   "private": true,
   "description": "Desktop app that lists and resumes your recent Claude Code sessions across every project, in up to 4 real terminal panes",
+  "author": "Breno Alvim <brenoalvim.dev@gmail.com>",
   "main": "./out/main/index.js",
   "repository": {
     "type": "git",
@@ -47,6 +48,7 @@
     "@xterm/addon-fit": "^0.11.0",
     "@xterm/addon-search": "^0.16.0",
     "@xterm/xterm": "^6.0.0",
+    "electron-log": "^5.4.4",
     "electron-updater": "^6.8.9",
     "node-pty": "^1.0.0",
     "react": "^19.2.8",

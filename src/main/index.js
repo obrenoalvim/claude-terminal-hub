@@ -1,8 +1,11 @@
 import { join } from 'node:path';
 import { app, BrowserWindow, dialog, ipcMain } from 'electron';
 import { autoUpdater } from 'electron-updater';
+import log from 'electron-log/main';
 import { listSessions } from './sessions.js';
 import { startPty, writeToPty, resizePty, killPty, killAllPtys } from './pty-manager.js';
+
+log.errorHandler.startCatching();
 
 const isDev = !app.isPackaged;
 const iconPath = join(__dirname, '../../build/icon.ico');
@@ -30,6 +33,7 @@ function createWindow() {
   }
 
   ipcMain.handle('sessions:list', () => listSessions());
+  ipcMain.on('renderer:error', (event, message) => log.error('[renderer]', message));
 
   ipcMain.on('pty:start', (event, { paneId, cwd, cols, rows, command, shell }) => {
     startPty(
@@ -64,6 +68,7 @@ autoUpdater.on('update-downloaded', (info) => {
 const UPDATE_CHECK_INTERVAL_MS = 4 * 60 * 60 * 1000;
 
 app.whenReady().then(() => {
+  log.info(`Claude Terminal Hub ${app.getVersion()} starting`);
   createWindow();
   if (app.isPackaged) {
     autoUpdater.checkForUpdates();

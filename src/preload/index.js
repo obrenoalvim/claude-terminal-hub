@@ -2,6 +2,7 @@ import { contextBridge, ipcRenderer } from 'electron';
 
 contextBridge.exposeInMainWorld('api', {
   listSessions: () => ipcRenderer.invoke('sessions:list'),
+  logError: (message) => ipcRenderer.send('renderer:error', message),
 
   startPty: (paneId, opts) => ipcRenderer.send('pty:start', { paneId, ...opts }),
   sendInput: (paneId, data) => ipcRenderer.send('pty:input', { paneId, data }),

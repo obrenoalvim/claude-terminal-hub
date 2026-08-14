@@ -23,14 +23,16 @@ const ACTIVITY_DECAY_MS = 1500;
 
 export default function TerminalPane({ pane, focused, onFocus, onClose, onNewHere, fontSize, theme }) {
   const bodyRef = useRef(null);
-  const dotRef = useRef(null);
   const termRef = useRef(null);
   const searchRef = useRef(null);
   const searchInputRef = useRef(null);
   const activityTimerRef = useRef(null);
+  const activeRef = useRef(false);
   const { paneId, title, cwd, command, shell } = pane;
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [status, setStatus] = useState('idle'); // idle | active | dead
+  const [confirmClose, setConfirmClose] = useState(false);
 
   useEffect(() => {
     const term = new Terminal({
@@ -52,15 +54,20 @@ export default function TerminalPane({ pane, focused, onFocus, onClose, onNewHer
 
     const offData = window.api.onPtyData(paneId, (data) => {
       term.write(data);
-      dotRef.current?.classList.add('active');
+      activeRef.current = true;
+      setStatus('active');
       clearTimeout(activityTimerRef.current);
-      activityTimerRef.current = setTimeout(() => dotRef.current?.classList.remove('active'), ACTIVITY_DECAY_MS);
+      activityTimerRef.current = setTimeout(() => {
+        activeRef.current = false;
+        setStatus('idle');
+      }, ACTIVITY_DECAY_MS);
       if (data.includes('\x07') && !document.hasFocus()) {
         try { new Notification('Claude Terminal Hub', { body: `${title}: precisa de atenção` }); } catch { /* notifications may be unavailable */ }
       }
     });
     const offExit = window.api.onPtyExit(paneId, () => {
-      dotRef.current?.classList.add('dead');
+      activeRef.current = false;
+      setStatus('dead');
       if (!document.hasFocus()) {
         try { new Notification('Claude Terminal Hub', { body: `${title}: terminal encerrado` }); } catch { /* notifications may be unavailable */ }
       }
@@ -116,11 +123,16 @@ export default function TerminalPane({ pane, focused, onFocus, onClose, onNewHer
     else searchRef.current?.findPrevious(searchQuery);
   };
 
+  const requestClose = () => {
+    if (activeRef.current) setConfirmClose(true);
+    else onClose();
+  };
+
   return (
     <div className={`pane${focused ? ' focused' : ''}`} onMouseDown={onFocus}>
       <div className="pane-head">
         <div className="pane-title">
-          <span className="pane-dot" ref={dotRef} />
+          <span className={`pane-dot${status === 'dead' ? ' dead' : ''}${status === 'active' ? ' active' : ''}`} />
           <span className="pane-title-text">{title}</span>
         </div>
         <div className="pane-actions">
@@ -133,11 +145,20 @@ export default function TerminalPane({ pane, focused, onFocus, onClose, onNewHer
               +
             </button>
           )}
-          <button className="pane-close" title="Fechar" onClick={(e) => { e.stopPropagation(); onClose(); }}>
+          <button className="pane-close" title="Fechar" onClick={(e) => { e.stopPropagation(); requestClose(); }}>
             ✕
           </button>
         </div>
       </div>
+      {confirmClose && (
+        <div className="pane-confirm" onMouseDown={(e) => e.stopPropagation()}>
+          <span>Painel com atividade recente. Fechar mesmo assim?</span>
+          <div className="pane-confirm-actions">
+            <button className="pane-confirm-cancel" onClick={() => setConfirmClose(false)}>Cancelar</button>
+            <button className="pane-confirm-ok" onClick={onClose}>Fechar</button>
+          </div>
+        </div>
+      )}
       {searchOpen && (
         <div className="pane-search" onMouseDown={(e) => e.stopPropagation()}>
           <input

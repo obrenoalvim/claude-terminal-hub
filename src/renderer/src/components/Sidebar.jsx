@@ -18,7 +18,7 @@ function timeAgo(ms) {
   return `${day}d atrás`;
 }
 
-export default function Sidebar({ collapsed, onToggleCollapse, onOpenSession, onNewShell, canOpen, onOpenSettings }) {
+export default function Sidebar({ collapsed, onToggleCollapse, onOpenSession, openSessionIds, onNewShell, canOpen, onOpenSettings }) {
   const [sessions, setSessions] = useState(null); // null = loading
   const [query, setQuery] = useState('');
   const [shellMenuOpen, setShellMenuOpen] = useState(false);
@@ -112,20 +112,26 @@ export default function Sidebar({ collapsed, onToggleCollapse, onOpenSession, on
         {sessions && sessions.length > 0 && filtered.length === 0 && (
           <div className="session-empty">Nenhuma sessão bate com a busca.</div>
         )}
-        {filtered.map((s) => (
-          <div
-            key={s.id}
-            className={`session-item${canOpen ? '' : ' disabled'}`}
-            onClick={() => canOpen && onOpenSession(s)}
-          >
-            <div className="session-title">{s.title || s.preview || s.id}</div>
-            <div className="session-preview">{s.preview || ''}</div>
-            <div className="session-meta">
-              <span className="session-project" title={s.cwd}>{s.project}</span>
-              <span className="session-time">{timeAgo(s.mtime)}</span>
+        {filtered.map((s) => {
+          const isOpen = openSessionIds?.has(s.id);
+          return (
+            <div
+              key={s.id}
+              className={`session-item${canOpen || isOpen ? '' : ' disabled'}${isOpen ? ' open' : ''}`}
+              onClick={() => (canOpen || isOpen) && onOpenSession(s)}
+            >
+              <div className="session-title">
+                {s.title || s.preview || s.id}
+                {isOpen && <span className="session-open-tag">aberto</span>}
+              </div>
+              <div className="session-preview">{s.preview || ''}</div>
+              <div className="session-meta">
+                <span className="session-project" title={s.cwd}>{s.project}</span>
+                <span className="session-time">{timeAgo(s.mtime)}</span>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </aside>
   );

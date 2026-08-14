@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Sidebar from './components/Sidebar.jsx';
 import PaneGrid from './components/PaneGrid.jsx';
 import SettingsPanel from './components/SettingsPanel.jsx';
@@ -45,6 +45,10 @@ export default function App() {
   );
   const [theme, setTheme] = useState(() => localStorage.getItem(THEME_KEY) || 'dark');
   const paneSeq = useRef(panes.length);
+  const openSessionIds = useMemo(
+    () => new Set(panes.map((p) => p.sessionId).filter(Boolean)),
+    [panes]
+  );
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -60,7 +64,7 @@ export default function App() {
   }, [skipPermissions]);
 
   useEffect(() => {
-    const toStore = panes.map(({ title, cwd, command, shell }) => ({ title, cwd, command, shell }));
+    const toStore = panes.map(({ title, cwd, command, shell, sessionId }) => ({ title, cwd, command, shell, sessionId }));
     localStorage.setItem(PANES_KEY, JSON.stringify(toStore));
   }, [panes]);
 
@@ -68,14 +72,35 @@ export default function App() {
     localStorage.setItem(FONT_SIZE_KEY, String(fontSize));
   }, [fontSize]);
 
-  const openPane = useCallback(({ title, cwd, command, shell }) => {
+  const openPane = useCallback(({ title, cwd, command, shell, sessionId }) => {
     setPanes((prev) => {
       if (prev.length >= MAX_PANES) return prev;
       const paneId = `pane-${++paneSeq.current}`;
       setFocusedId(paneId);
-      return [...prev, { paneId, title, cwd: cwd || null, command: command || null, shell: shell || null }];
+      return [...prev, { paneId, title, cwd: cwd || null, command: command || null, shell: shell || null, sessionId: sessionId || null }];
     });
   }, []);
+
+  const openSession = useCallback((session) => {
+    setPanes((prev) => {
+      const existing = prev.find((p) => p.sessionId === session.id);
+      if (existing) {
+        setFocusedId(existing.paneId);
+        return prev;
+      }
+      if (prev.length >= MAX_PANES) return prev;
+      const paneId = `pane-${++paneSeq.current}`;
+      setFocusedId(paneId);
+      return [...prev, {
+        paneId,
+        title: session.project,
+        cwd: session.cwd,
+        command: `claude --resume ${session.id}${skipPermissions ? ' --dangerously-skip-permissions' : ''}`,
+        shell: null,
+        sessionId: session.id,
+      }];
+    });
+  }, [skipPermissions]);
 
   const closePane = useCallback((paneId) => {
     setPanes((prev) => prev.filter((p) => p.paneId !== paneId));
@@ -123,13 +148,8 @@ export default function App() {
       <Sidebar
         collapsed={sidebarCollapsed}
         onToggleCollapse={() => setSidebarCollapsed((c) => !c)}
-        onOpenSession={(session) =>
-          openPane({
-            title: session.project,
-            cwd: session.cwd,
-            command: `claude --resume ${session.id}${skipPermissions ? ' --dangerously-skip-permissions' : ''}`,
-          })
-        }
+        onOpenSession={openSession}
+        openSessionIds={openSessionIds}
         onNewShell={(shell) => openPane({ title: SHELL_LABELS[shell] || 'PowerShell', cwd: null, command: null, shell })}
         canOpen={panes.length < MAX_PANES}
         onOpenSettings={() => setSettingsOpen(true)}
