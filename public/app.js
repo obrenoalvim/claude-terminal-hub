@@ -4,9 +4,11 @@ const emptyState = document.getElementById('empty-state');
 const sessionList = document.getElementById('session-list');
 const newShellBtn = document.getElementById('new-shell-btn');
 const refreshBtn = document.getElementById('refresh-btn');
+const searchInput = document.getElementById('search-input');
 
 let panes = []; // { id, el, term, fit, ws, socketReady }
 let paneSeq = 0;
+let allSessions = [];
 
 function wsUrl() {
   const proto = location.protocol === 'https:' ? 'wss' : 'ws';
@@ -127,16 +129,31 @@ async function loadSessions() {
   sessionList.innerHTML = '<div class="session-empty">Carregando…</div>';
   try {
     const res = await fetch('/api/sessions');
-    const sessions = await res.json();
-    renderSessions(sessions);
+    allSessions = await res.json();
+    renderSessions(filterSessions(searchInput.value));
   } catch {
     sessionList.innerHTML = '<div class="session-empty">Falha ao carregar sessões.</div>';
   }
 }
 
+function filterSessions(query) {
+  const q = query.trim().toLowerCase();
+  if (!q) return allSessions;
+  return allSessions.filter((s) =>
+    [s.title, s.preview, s.project, s.cwd].some((field) => field && field.toLowerCase().includes(q))
+  );
+}
+
+searchInput.addEventListener('input', () => {
+  renderSessions(filterSessions(searchInput.value));
+});
+
 function renderSessions(sessions) {
   if (!sessions.length) {
-    sessionList.innerHTML = '<div class="session-empty">Nenhuma sessão encontrada em ~/.claude/projects.</div>';
+    const msg = searchInput.value.trim()
+      ? 'Nenhuma sessão bate com a busca.'
+      : 'Nenhuma sessão encontrada em ~/.claude/projects.';
+    sessionList.innerHTML = `<div class="session-empty">${msg}</div>`;
     return;
   }
   sessionList.innerHTML = '';

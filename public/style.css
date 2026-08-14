@@ -40,6 +40,7 @@ html, body {
   display: flex;
   flex-direction: column;
   min-width: 0;
+  min-height: 0;
 }
 
 .sidebar-head {
@@ -98,6 +99,25 @@ html, body {
 .new-shell-btn span { color: var(--accent); font-size: 16px; font-weight: 700; }
 .new-shell-btn:hover { background: #1c1f2b; border-color: var(--accent); }
 .new-shell-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.search-wrap {
+  padding: 10px 16px 0;
+}
+
+.search-input {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 9px;
+  border: 1px solid var(--border);
+  background: var(--panel-2);
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-size: 12.5px;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+.search-input::placeholder { color: var(--text-faint); }
+.search-input:focus { border-color: var(--accent); }
 
 .sidebar-section-label {
   padding: 18px 16px 6px;
