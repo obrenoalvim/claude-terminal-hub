@@ -35,15 +35,15 @@ function createWindow() {
     startPty(
       paneId,
       { cwd, cols, rows, command },
-      (data) => win.webContents.send(`pty:data:${paneId}`, data),
-      () => win.webContents.send(`pty:exit:${paneId}`)
+      (data) => { if (!win.isDestroyed()) win.webContents.send(`pty:data:${paneId}`, data); },
+      () => { if (!win.isDestroyed()) win.webContents.send(`pty:exit:${paneId}`); }
     );
   });
   ipcMain.on('pty:input', (event, { paneId, data }) => writeToPty(paneId, data));
   ipcMain.on('pty:resize', (event, { paneId, cols, rows }) => resizePty(paneId, cols, rows));
   ipcMain.on('pty:kill', (event, { paneId }) => killPty(paneId));
 
-  win.on('closed', killAllPtys);
+  win.on('close', killAllPtys);
 }
 
 autoUpdater.on('update-downloaded', (info) => {
