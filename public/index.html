@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<title>Claude Terminal Hub</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="stylesheet" href="/vendor/xterm/css/xterm.css" />
+<link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <div id="app">
+    <aside id="sidebar">
+      <div class="sidebar-head">
+        <div class="brand">
+          <span class="brand-dot"></span>
+          <span class="brand-name">Claude Terminal Hub</span>
+        </div>
+        <button id="refresh-btn" title="Atualizar sessões">↻</button>
+      </div>
+
+      <button id="new-shell-btn" class="new-shell-btn">
+        <span>+</span> Novo terminal
+      </button>
+
+      <div class="sidebar-section-label">Sessões recentes</div>
+      <div id="session-list" class="session-list">
+        <div class="session-empty">Carregando…</div>
+      </div>
+    </aside>
+
+    <main id="pane-area">
+      <div id="pane-grid" class="pane-grid layout-0"></div>
+      <div id="empty-state" class="empty-state">
+        <div class="empty-title">Nenhum terminal aberto</div>
+        <div class="empty-sub">Escolha uma sessão à esquerda ou abra um terminal novo. Até 4 de uma vez.</div>
+      </div>
+    </main>
+  </div>
+
+  <script src="/vendor/xterm/lib/xterm.js"></script>
+  <script src="/vendor/addon-fit/lib/addon-fit.js"></script>
+  <script src="/app.js"></script>
+</body>
+</html>
