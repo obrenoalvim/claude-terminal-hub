@@ -17,7 +17,7 @@
 
 * { box-sizing: border-box; }
 
-html, body {
+html, body, #root {
   height: 100%;
   margin: 0;
   background: var(--bg);
@@ -224,7 +224,6 @@ html, body {
   border: 1px dashed var(--border);
   border-radius: var(--radius);
 }
-.empty-state.hidden { display: none; }
 .empty-title { font-size: 14px; color: var(--text-dim); font-weight: 600; }
 .empty-sub { font-size: 12px; max-width: 300px; text-align: center; }
 
@@ -266,6 +265,14 @@ html, body {
 .pane-dot { width: 7px; height: 7px; border-radius: 50%; background: #4ade80; flex-shrink: 0; }
 .pane-dot.dead { background: var(--text-faint); }
 
+.pane-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.pane-action,
 .pane-close {
   background: transparent;
   border: none;
@@ -275,8 +282,9 @@ html, body {
   width: 20px;
   height: 20px;
   border-radius: 6px;
-  flex-shrink: 0;
+  line-height: 1;
 }
+.pane-action:hover { color: var(--accent); background: var(--accent-soft); }
 .pane-close:hover { color: var(--danger); background: rgba(255, 107, 107, 0.1); }
 
 .pane-body {
