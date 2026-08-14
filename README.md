@@ -32,6 +32,17 @@ npm run dev
 
 `npm run dev` starts it in development mode with hot reload. `npm run build` produces a production bundle under `out/`; `npm start` previews that build.
 
+## Windows installer
+
+`npm run dist` builds the app and packages it into a Windows installer (NSIS `.exe`) under `dist/`. The installer lets you pick the install directory and adds Desktop/Start Menu shortcuts — no admin rights required (`oneClick: false`).
+
+```powershell
+npm install
+npm run dist
+```
+
+The resulting `dist/Claude Terminal Hub Setup <version>.exe` is the file to hand out; everything else under `dist/` is intermediate build output.
+
 ## Architecture
 
 - **Main process** (`src/main`) — owns the real work: `sessions.js` scans `~/.claude/projects` for session metadata, `pty-manager.js` owns the `node-pty` processes (one per open pane), `index.js` wires both up to `ipcMain` handlers and creates the window.
@@ -79,6 +90,17 @@ npm run dev
 ```
 
 `npm run dev` sobe em modo desenvolvimento com hot reload. `npm run build` gera um build de produção em `out/`; `npm start` roda esse build.
+
+### Instalador Windows
+
+`npm run dist` builda o app e empacota num instalador Windows (NSIS `.exe`) dentro de `dist/`. O instalador deixa escolher a pasta de instalação e cria atalhos na Área de Trabalho/Menu Iniciar — sem precisar de admin (`oneClick: false`).
+
+```powershell
+npm install
+npm run dist
+```
+
+O arquivo `dist/Claude Terminal Hub Setup <versão>.exe` é o que se distribui; o resto dentro de `dist/` é build intermediário.
 
 ### Arquitetura
 

@@ -8,7 +8,30 @@
     "dev": "electron-vite dev",
     "build": "electron-vite build",
     "start": "electron-vite preview",
-    "icon": "node scripts/build-icon.mjs"
+    "icon": "node scripts/build-icon.mjs",
+    "dist": "electron-vite build && electron-builder --win",
+    "lint": "eslint ."
+  },
+  "build": {
+    "appId": "dev.brenoalvim.claude-terminal-hub",
+    "productName": "Claude Terminal Hub",
+    "npmRebuild": false,
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "out/**/*"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "build/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    }
   },
   "dependencies": {
     "@xterm/addon-fit": "^0.11.0",
@@ -18,9 +41,15 @@
     "react-dom": "^19.2.8"
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.5",
     "@vitejs/plugin-react": "^4.7.0",
     "electron": "^43.4.0",
+    "electron-builder": "^26.15.3",
     "electron-vite": "^5.0.0",
+    "eslint": "^9.39.5",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "globals": "^17.11.0",
     "png-to-ico": "^3.0.2",
     "sharp": "^0.35.3",
     "vite": "^7.3.6"

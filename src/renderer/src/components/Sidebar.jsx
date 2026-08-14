@@ -11,7 +11,7 @@ function timeAgo(ms) {
   return `${day}d atrás`;
 }
 
-export default function Sidebar({ onOpenSession, onNewShell, canOpen }) {
+export default function Sidebar({ collapsed, onToggleCollapse, onOpenSession, onNewShell, canOpen }) {
   const [sessions, setSessions] = useState(null); // null = loading
   const [query, setQuery] = useState('');
 
@@ -32,17 +32,27 @@ export default function Sidebar({ onOpenSession, onNewShell, canOpen }) {
   }, [sessions, query]);
 
   return (
-    <aside id="sidebar">
+    <aside id="sidebar" className={collapsed ? 'collapsed' : ''}>
       <div className="sidebar-head">
         <div className="brand">
           <span className="brand-dot" />
           <span className="brand-name">Claude Terminal Hub</span>
         </div>
-        <button id="refresh-btn" title="Atualizar sessões" onClick={load}>↻</button>
+        <div className="sidebar-head-actions">
+          <button id="refresh-btn" title="Atualizar sessões" onClick={load}>↻</button>
+          <button
+            id="collapse-btn"
+            title={collapsed ? 'Expandir menu' : 'Recolher menu'}
+            onClick={onToggleCollapse}
+          >
+            {collapsed ? '»' : '«'}
+          </button>
+        </div>
       </div>
 
-      <button className="new-shell-btn" disabled={!canOpen} onClick={onNewShell}>
-        <span>+</span> Novo terminal
+      <button className="new-shell-btn" disabled={!canOpen} onClick={onNewShell} title="Novo terminal">
+        <span className="icon">+</span>
+        <span className="label">Novo terminal</span>
       </button>
 
       <div className="search-wrap">
