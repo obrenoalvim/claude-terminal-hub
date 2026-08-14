@@ -4,6 +4,7 @@ import { listSessions } from './sessions.js';
 import { startPty, writeToPty, resizePty, killPty, killAllPtys } from './pty-manager.js';
 
 const isDev = !app.isPackaged;
+const iconPath = join(__dirname, '../../build/icon.ico');
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -13,6 +14,7 @@ function createWindow() {
     minHeight: 560,
     backgroundColor: '#0b0c10',
     autoHideMenuBar: true,
+    icon: iconPath,
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       contextIsolation: true,
