@@ -1,6 +1,6 @@
 {
   "name": "claude-terminal-hub",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "description": "Desktop app that lists and resumes your recent Claude Code sessions across every project, in up to 4 real terminal panes",
   "main": "./out/main/index.js",
