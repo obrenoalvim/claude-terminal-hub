@@ -10,7 +10,9 @@ const PORT = process.env.PORT || 4173;
 const PROJECTS_DIR = path.join(os.homedir(), '.claude', 'projects');
 const SHELL = process.platform === 'win32' ? 'powershell.exe' : (process.env.SHELL || 'bash');
 const MAX_SESSIONS = 200;
-const HEAD_BYTES = 4096;
+// Session lines can carry large fields (hook/system-reminder text) before "cwd",
+// so the head chunk has to be generous enough to still contain it.
+const HEAD_BYTES = 65536;
 const TAIL_BYTES = 16384;
 
 function readChunk(fd, size, position) {
@@ -32,17 +34,13 @@ function lastJsonWithField(text, field) {
   return null;
 }
 
-function firstJsonWithField(text, field) {
-  const lines = text.split('\n');
-  for (const line of lines) {
-    const trimmed = line.trim();
-    if (!trimmed || trimmed[0] !== '{') continue;
-    try {
-      const obj = JSON.parse(trimmed);
-      if (obj[field] !== undefined) return obj;
-    } catch { /* partial/truncated line, skip */ }
-  }
-  return null;
+// Regex-based, not line/JSON-based: a truncated head chunk can cut a huge
+// preceding field mid-value, so the "cwd" line itself may never fully parse.
+// Matching the field directly sidesteps that.
+function extractStringField(text, field) {
+  const m = text.match(new RegExp(`"${field}":"((?:\\\\.|[^"\\\\])*)"`));
+  if (!m) return null;
+  try { return JSON.parse(`"${m[1]}"`); } catch { return null; }
 }
 
 function readSession(filePath, stat) {
@@ -53,16 +51,16 @@ function readSession(filePath, stat) {
     const tailSize = Math.min(TAIL_BYTES, stat.size);
     const tailText = readChunk(fd, tailSize, Math.max(0, stat.size - tailSize));
 
-    const cwdObj = firstJsonWithField(headText, 'cwd');
+    const cwd = extractStringField(headText, 'cwd');
+    const gitBranch = extractStringField(headText, 'gitBranch');
     const titleObj = lastJsonWithField(tailText, 'aiTitle');
     const promptObj = lastJsonWithField(tailText, 'lastPrompt');
 
-    const cwd = cwdObj ? cwdObj.cwd : null;
     return {
       id: path.basename(filePath, '.jsonl'),
       cwd,
       project: cwd ? (path.basename(cwd) || cwd) : 'unknown',
-      gitBranch: cwdObj ? cwdObj.gitBranch || null : null,
+      gitBranch,
       title: titleObj ? titleObj.aiTitle : null,
       preview: promptObj ? promptObj.lastPrompt : null,
       mtime: stat.mtimeMs,

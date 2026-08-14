@@ -7,8 +7,8 @@
   --text: #e7e8ee;
   --text-dim: #9497a6;
   --text-faint: #63667a;
-  --accent: #8b7cff;
-  --accent-soft: rgba(139, 124, 255, 0.14);
+  --accent: #d97757;
+  --accent-soft: rgba(217, 119, 87, 0.14);
   --danger: #ff6b6b;
   --radius: 14px;
   --font-ui: "Segoe UI", "Inter", system-ui, sans-serif;
@@ -160,7 +160,7 @@ html, body {
 
 .session-project {
   background: var(--accent-soft);
-  color: #bfb3ff;
+  color: #f0b49c;
   padding: 1px 7px;
   border-radius: 999px;
   white-space: nowrap;

@@ -56,8 +56,8 @@ function openPane({ title, cwd, command }) {
     theme: {
       background: '#08090c',
       foreground: '#e7e8ee',
-      cursor: '#8b7cff',
-      selectionBackground: 'rgba(139,124,255,0.35)',
+      cursor: '#d97757',
+      selectionBackground: 'rgba(217,119,87,0.35)',
     },
   });
   const fit = new FitAddon.FitAddon();
