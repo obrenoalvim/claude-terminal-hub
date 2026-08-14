@@ -1,5 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
 
+const SHELL_CHOICES = [
+  { key: 'powershell', label: 'PowerShell' },
+  { key: 'cmd', label: 'Prompt (cmd)' },
+  { key: 'gitbash', label: 'Git Bash' },
+  { key: 'wsl', label: 'WSL' },
+];
+
 function timeAgo(ms) {
   const diff = Date.now() - ms;
   const min = Math.floor(diff / 60000);
@@ -11,9 +18,10 @@ function timeAgo(ms) {
   return `${day}d atrás`;
 }
 
-export default function Sidebar({ collapsed, onToggleCollapse, onOpenSession, onNewShell, canOpen }) {
+export default function Sidebar({ collapsed, onToggleCollapse, onOpenSession, onNewShell, canOpen, onOpenSettings }) {
   const [sessions, setSessions] = useState(null); // null = loading
   const [query, setQuery] = useState('');
+  const [shellMenuOpen, setShellMenuOpen] = useState(false);
 
   const load = () => {
     setSessions(null);
@@ -40,6 +48,7 @@ export default function Sidebar({ collapsed, onToggleCollapse, onOpenSession, on
         </div>
         <div className="sidebar-head-actions">
           <button id="refresh-btn" title="Atualizar sessões" onClick={load}>↻</button>
+          <button id="settings-btn" title="Configurações" onClick={onOpenSettings}>⚙</button>
           <button
             id="collapse-btn"
             title={collapsed ? 'Expandir menu' : 'Recolher menu'}
@@ -50,10 +59,38 @@ export default function Sidebar({ collapsed, onToggleCollapse, onOpenSession, on
         </div>
       </div>
 
-      <button className="new-shell-btn" disabled={!canOpen} onClick={onNewShell} title="Novo terminal">
-        <span className="icon">+</span>
-        <span className="label">Novo terminal</span>
-      </button>
+      <div className="new-shell-wrap">
+        <button
+          className="new-shell-btn"
+          disabled={!canOpen}
+          onClick={() => onNewShell('powershell')}
+          title="Novo terminal (PowerShell)"
+        >
+          <span className="icon">+</span>
+          <span className="label">Novo terminal</span>
+        </button>
+        <button
+          className="new-shell-caret"
+          disabled={!canOpen}
+          title="Escolher shell"
+          onClick={() => setShellMenuOpen((o) => !o)}
+        >
+          ▾
+        </button>
+        {shellMenuOpen && (
+          <div className="shell-menu" onMouseLeave={() => setShellMenuOpen(false)}>
+            {SHELL_CHOICES.map((s) => (
+              <button
+                key={s.key}
+                className="shell-menu-item"
+                onClick={() => { onNewShell(s.key); setShellMenuOpen(false); }}
+              >
+                {s.label}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
 
       <div className="search-wrap">
         <input

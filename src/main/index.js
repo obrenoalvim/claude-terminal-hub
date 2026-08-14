@@ -31,10 +31,10 @@ function createWindow() {
 
   ipcMain.handle('sessions:list', () => listSessions());
 
-  ipcMain.on('pty:start', (event, { paneId, cwd, cols, rows, command }) => {
+  ipcMain.on('pty:start', (event, { paneId, cwd, cols, rows, command, shell }) => {
     startPty(
       paneId,
-      { cwd, cols, rows, command },
+      { cwd, cols, rows, command, shell },
       (data) => { if (!win.isDestroyed()) win.webContents.send(`pty:data:${paneId}`, data); },
       () => { if (!win.isDestroyed()) win.webContents.send(`pty:exit:${paneId}`); }
     );
@@ -61,9 +61,14 @@ autoUpdater.on('update-downloaded', (info) => {
     });
 });
 
+const UPDATE_CHECK_INTERVAL_MS = 4 * 60 * 60 * 1000;
+
 app.whenReady().then(() => {
   createWindow();
-  if (app.isPackaged) autoUpdater.checkForUpdates();
+  if (app.isPackaged) {
+    autoUpdater.checkForUpdates();
+    setInterval(() => autoUpdater.checkForUpdates(), UPDATE_CHECK_INTERVAL_MS);
+  }
 });
 
 app.on('window-all-closed', () => {

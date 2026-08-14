@@ -1,6 +1,6 @@
 import TerminalPane from './TerminalPane.jsx';
 
-export default function PaneGrid({ panes, focusedId, onFocus, onClose, onNewHere, canOpen }) {
+export default function PaneGrid({ panes, focusedId, onFocus, onClose, onNewHere, canOpen, fontSize, theme }) {
   return (
     <main id="pane-area">
       <div className={`pane-grid layout-${panes.length}`}>
@@ -12,6 +12,8 @@ export default function PaneGrid({ panes, focusedId, onFocus, onClose, onNewHere
             onFocus={() => onFocus(pane.paneId)}
             onClose={() => onClose(pane.paneId)}
             onNewHere={pane.cwd && canOpen ? () => onNewHere(pane.cwd, pane.title) : null}
+            fontSize={fontSize}
+            theme={theme}
           />
         ))}
       </div>

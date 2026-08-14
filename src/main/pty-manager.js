@@ -4,13 +4,33 @@ import pty from 'node-pty';
 
 const SHELL = process.platform === 'win32' ? 'powershell.exe' : (process.env.SHELL || 'bash');
 
+const GIT_BASH_CANDIDATES = [
+  'C:\\Program Files\\Git\\bin\\bash.exe',
+  'C:\\Program Files (x86)\\Git\\bin\\bash.exe',
+];
+const GIT_BASH = GIT_BASH_CANDIDATES.find((p) => fs.existsSync(p)) || null;
+
+// wsl.exe/cmd.exe/powershell.exe are resolved via PATH/System32, so no existsSync check;
+// Git Bash is a real filesystem path and may not be installed, so it's verified above.
+const SHELL_OPTIONS = {
+  powershell: 'powershell.exe',
+  cmd: 'cmd.exe',
+  gitbash: GIT_BASH,
+  wsl: 'wsl.exe',
+};
+
+function resolveShell(shell) {
+  if (process.platform !== 'win32') return SHELL;
+  return SHELL_OPTIONS[shell] || SHELL;
+}
+
 const ptys = new Map(); // paneId -> pty process
 
-export function startPty(paneId, { cwd, cols, rows, command }, onData, onExit) {
+export function startPty(paneId, { cwd, cols, rows, command, shell }, onData, onExit) {
   if (ptys.has(paneId)) return;
 
   const resolvedCwd = cwd && fs.existsSync(cwd) ? cwd : os.homedir();
-  const term = pty.spawn(SHELL, [], {
+  const term = pty.spawn(resolveShell(shell), [], {
     name: 'xterm-256color',
     cols: cols || 80,
     rows: rows || 24,
