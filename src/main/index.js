@@ -2,13 +2,15 @@ import { join } from 'node:path';
 import { app, BrowserWindow, dialog, ipcMain } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log/main';
-import { listSessions } from './sessions.js';
+import { listSessions, deleteSession, renameSession, pinSession } from './sessions.js';
 import { startPty, writeToPty, resizePty, killPty, killAllPtys } from './pty-manager.js';
+import { translate, DEFAULT_LANG } from '../shared/i18n.js';
 
 log.errorHandler.startCatching();
 
 const isDev = !app.isPackaged;
 const iconPath = join(__dirname, '../../build/icon.ico');
+let currentLang = DEFAULT_LANG;
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -33,7 +35,11 @@ function createWindow() {
   }
 
   ipcMain.handle('sessions:list', () => listSessions());
+  ipcMain.handle('sessions:delete', (event, id) => deleteSession(id));
+  ipcMain.handle('sessions:rename', (event, id, name) => renameSession(id, name));
+  ipcMain.handle('sessions:pin', (event, id, pinned) => pinSession(id, pinned));
   ipcMain.on('renderer:error', (event, message) => log.error('[renderer]', message));
+  ipcMain.on('settings:language', (event, lang) => { currentLang = lang; });
 
   ipcMain.on('pty:start', (event, { paneId, cwd, cols, rows, command, shell }) => {
     startPty(
@@ -50,13 +56,30 @@ function createWindow() {
   win.on('close', killAllPtys);
 }
 
+autoUpdater.autoDownload = false;
+
+autoUpdater.on('update-available', (info) => {
+  dialog
+    .showMessageBox({
+      type: 'info',
+      title: translate(currentLang, 'update.available.title'),
+      message: translate(currentLang, 'update.available.message', { version: info.version }),
+      buttons: [translate(currentLang, 'update.available.now'), translate(currentLang, 'update.available.later')],
+      defaultId: 0,
+      cancelId: 1,
+    })
+    .then(({ response }) => {
+      if (response === 0) autoUpdater.downloadUpdate();
+    });
+});
+
 autoUpdater.on('update-downloaded', (info) => {
   dialog
     .showMessageBox({
       type: 'info',
-      title: 'Atualização disponível',
-      message: `Claude Terminal Hub ${info.version} foi baixado. Reiniciar agora para instalar?`,
-      buttons: ['Reiniciar agora', 'Depois'],
+      title: translate(currentLang, 'update.downloaded.title'),
+      message: translate(currentLang, 'update.downloaded.message', { version: info.version }),
+      buttons: [translate(currentLang, 'update.downloaded.now'), translate(currentLang, 'update.downloaded.later')],
       defaultId: 0,
       cancelId: 1,
     })
@@ -65,15 +88,10 @@ autoUpdater.on('update-downloaded', (info) => {
     });
 });
 
-const UPDATE_CHECK_INTERVAL_MS = 4 * 60 * 60 * 1000;
-
 app.whenReady().then(() => {
   log.info(`Claude Terminal Hub ${app.getVersion()} starting`);
   createWindow();
-  if (app.isPackaged) {
-    autoUpdater.checkForUpdates();
-    setInterval(() => autoUpdater.checkForUpdates(), UPDATE_CHECK_INTERVAL_MS);
-  }
+  if (app.isPackaged) autoUpdater.checkForUpdates();
 });
 
 app.on('window-all-closed', () => {

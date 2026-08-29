@@ -6,6 +6,10 @@ Click a session in the sidebar and it opens a new pane already `cd`'d into that 
 
 🇧🇷 [Leia em português abaixo](#-português)
 
+### ⬇️ [Download for Windows](https://github.com/obrenoalvim/claude-terminal-hub/releases/latest)
+
+Grab the `.exe` from the latest release, run the installer, done — no `git clone`, no `npm install`, no build step.
+
 ## Features
 
 - **Cross-project session list** — scans `~/.claude/projects/*.jsonl` directly, no config needed. Searchable, sorted by most recent activity. Clicking a session already open in a pane focuses it instead of opening a duplicate.
@@ -17,6 +21,7 @@ Click a session in the sidebar and it opens a new pane already `cd`'d into that 
 - **Keyboard shortcuts** — Ctrl+T new terminal, Ctrl+W close focused pane, Ctrl+Tab cycle focus, Ctrl+F search the focused pane, Ctrl+=/-/0 to zoom.
 - **In-terminal search** (Ctrl+F) via xterm's search addon — jump between matches in a pane's scrollback.
 - **Light/dark theme**, toggle in Settings.
+- **English/Portuguese UI**, toggle in Settings — English by default.
 - **Activity indicator** on each pane's status dot, and a confirmation prompt before closing a pane that had recent output — so you don't lose a running command to a stray click.
 - **Desktop notification** when a pane exits or rings the terminal bell while the window isn't focused.
 - **Auto-update**, checked on launch and every 4 hours while the app is open.
@@ -30,6 +35,8 @@ Click a session in the sidebar and it opens a new pane already `cd`'d into that 
 - Git Bash and/or WSL are optional — only needed if you pick them from the shell picker; the app falls back to PowerShell if they're not installed
 
 ## Install & run
+
+Just want to use the app? Use the [download link above](https://github.com/obrenoalvim/claude-terminal-hub/releases/latest) instead — the steps below are for building from source.
 
 ```powershell
 git clone https://github.com/obrenoalvim/claude-terminal-hub.git
@@ -59,11 +66,13 @@ To publish a release: bump `version` in `package.json`, then run `npm run releas
 
 **Note:** `electron-builder` creates the GitHub Release as a **draft**. A draft release is invisible to `electron-updater`, so existing installs won't see the update until it's published: `gh release edit vX.Y.Z --draft=false`.
 
+The installer's filename is fixed (`Claude-Terminal-Hub-Setup.exe`, no version number) so the [download link above](https://github.com/obrenoalvim/claude-terminal-hub/releases/latest) always points at the latest build.
+
 ## Architecture
 
 - **Main process** (`src/main`) — owns the real work: `sessions.js` scans `~/.claude/projects` for session metadata, `pty-manager.js` owns the `node-pty` processes (one per open pane, spawning whichever shell was picked, with a graceful fallback if it's not installed), `index.js` wires both up to `ipcMain` handlers, creates the window, and drives the periodic `electron-updater` check. `electron-log` is wired in here too — crashes and pty-spawn failures land in a log file instead of vanishing.
 - **Preload** (`src/preload`) — exposes a narrow `window.api` surface via `contextBridge` (list sessions, start/write/resize/kill a pty pane, subscribe to pty output, forward a renderer error to the main-process log). No Node or Electron internals leak into the renderer.
-- **Renderer** (`src/renderer`) — a small React app: `Sidebar` (search + session list + shell picker), `PaneGrid` (lays out however many panes are open), `TerminalPane` (an [xterm.js](https://xtermjs.org/) instance — plus its search addon — wired to one pty via the preload API), `SettingsPanel` (skip-permissions and theme toggles). Open panes, font size, theme, and sidebar state persist to `localStorage` and rehydrate on launch.
+- **Renderer** (`src/renderer`) — a small React app: `Sidebar` (search + session list + shell picker), `PaneGrid` (lays out however many panes are open), `TerminalPane` (an [xterm.js](https://xtermjs.org/) instance — plus its search addon — wired to one pty via the preload API), `SettingsPanel` (skip-permissions, theme, and language toggles). Open panes, font size, theme, language, and sidebar state persist to `localStorage` and rehydrate on launch. UI strings live in `src/shared/locales` (`en.js`/`pt.js`), shared between the renderer and the main process (native update dialogs) via `src/shared/i18n.js`.
 
 Claude Code writes one `.jsonl` transcript per session, and each line already carries the working directory (`cwd`), an AI-generated title (`aiTitle`), and the last prompt you sent (`lastPrompt`). `sessions.js` reads only the first and last few KB of each file (not the whole transcript) to pull those out fast, sorts everything by modification time, and hands it to the renderer as JSON.
 
@@ -83,6 +92,10 @@ Um app desktop que resolve o "em que pasta era essa sessão do Claude Code mesmo
 
 Clica numa sessão na barra lateral e ela abre um painel novo já com `cd` pra pasta certa, rodando `claude --resume <session-id>`. Sem abrir o Explorer, achar a pasta certa, abrir um terminal ali e digitar `claude --resume` na mão.
 
+### ⬇️ [Baixar para Windows](https://github.com/obrenoalvim/claude-terminal-hub/releases/latest)
+
+Pega o `.exe` na última release, roda o instalador, pronto — sem `git clone`, sem `npm install`, sem build.
+
 ### Funcionalidades
 
 - **Lista de sessões entre projetos** — lê `~/.claude/projects/*.jsonl` direto, sem precisar configurar nada. Com busca, ordenado por atividade mais recente. Clicar numa sessão que já tá aberta num painel só foca ele, sem duplicar.
@@ -94,6 +107,7 @@ Clica numa sessão na barra lateral e ela abre um painel novo já com `cd` pra p
 - **Atalhos de teclado** — Ctrl+T novo terminal, Ctrl+W fecha painel focado, Ctrl+Tab cicla foco, Ctrl+F busca no painel focado, Ctrl+/Ctrl-/Ctrl+0 zoom.
 - **Busca dentro do terminal** (Ctrl+F) via addon de busca do xterm — navega entre ocorrências no scrollback do painel.
 - **Tema claro/escuro**, toggle nas Configurações.
+- **Interface em inglês/português**, toggle nas Configurações — inglês por padrão.
 - **Indicador de atividade** no dot de status de cada painel, e confirmação antes de fechar um painel com atividade recente — pra não perder um comando rodando por um clique sem querer.
 - **Notificação desktop** quando um painel encerra ou toca o bell do terminal com a janela sem foco.
 - **Auto-update**, checado ao abrir e a cada 4h com o app aberto.
@@ -107,6 +121,8 @@ Clica numa sessão na barra lateral e ela abre um painel novo já com `cd` pra p
 - Git Bash e/ou WSL são opcionais — só necessários se você escolher eles no seletor de shell; o app cai pra PowerShell se não tiverem instalados
 
 ### Instalar e rodar
+
+Só quer usar o app? Usa o [link de download acima](https://github.com/obrenoalvim/claude-terminal-hub/releases/latest) — os passos abaixo são pra quem vai buildar a partir do código-fonte.
 
 ```powershell
 git clone https://github.com/obrenoalvim/claude-terminal-hub.git
@@ -136,11 +152,13 @@ Pra publicar uma release: sobe o `version` no `package.json`, depois roda `npm r
 
 **Atenção:** o `electron-builder` cria a GitHub Release como **draft**. Uma release draft é invisível pro `electron-updater`, então quem já tem o app instalado não vê a atualização até ela ser publicada: `gh release edit vX.Y.Z --draft=false`.
 
+O nome do instalador é fixo (`Claude-Terminal-Hub-Setup.exe`, sem número de versão), então o [link de download acima](https://github.com/obrenoalvim/claude-terminal-hub/releases/latest) sempre aponta pro build mais recente.
+
 ### Arquitetura
 
 - **Processo principal** (`src/main`) — dono do trabalho de verdade: `sessions.js` varre `~/.claude/projects` atrás de metadados de sessão, `pty-manager.js` gerencia os processos `node-pty` (um por painel aberto, com o shell escolhido, e fallback gracioso se ele não tiver instalado), `index.js` liga os dois a handlers do `ipcMain`, cria a janela e conduz o check periódico do `electron-updater`. O `electron-log` também tá ligado aqui — crash e falha de spawn do pty caem num arquivo de log em vez de sumir.
 - **Preload** (`src/preload`) — expõe uma superfície estreita `window.api` via `contextBridge` (listar sessões, iniciar/escrever/redimensionar/matar um painel, assinar a saída do pty, repassar erro do renderer pro log do main). Nada de Node ou internals do Electron vaza pro renderer.
-- **Renderer** (`src/renderer`) — um app React pequeno: `Sidebar` (busca + lista de sessões + escolha de shell), `PaneGrid` (organiza quantos painéis estiverem abertos), `TerminalPane` (uma instância do [xterm.js](https://xtermjs.org/) — mais o addon de busca — ligada a um pty via a API do preload), `SettingsPanel` (toggles de skip-permissions e tema). Painéis abertos, tamanho de fonte, tema e estado da sidebar persistem no `localStorage` e voltam ao abrir o app.
+- **Renderer** (`src/renderer`) — um app React pequeno: `Sidebar` (busca + lista de sessões + escolha de shell), `PaneGrid` (organiza quantos painéis estiverem abertos), `TerminalPane` (uma instância do [xterm.js](https://xtermjs.org/) — mais o addon de busca — ligada a um pty via a API do preload), `SettingsPanel` (toggles de skip-permissions, tema e idioma). Painéis abertos, tamanho de fonte, tema, idioma e estado da sidebar persistem no `localStorage` e voltam ao abrir o app. Os textos da interface ficam em `src/shared/locales` (`en.js`/`pt.js`), compartilhados entre o renderer e o processo principal (diálogos nativos de atualização) via `src/shared/i18n.js`.
 
 O Claude Code grava uma transcrição `.jsonl` por sessão, e cada linha já carrega o diretório de trabalho (`cwd`), um título gerado por IA (`aiTitle`) e o último prompt que você mandou (`lastPrompt`). O `sessions.js` lê só os primeiros e últimos KB de cada arquivo (não a transcrição inteira) pra puxar isso rápido, ordena tudo por data de modificação, e entrega pro renderer como JSON.
 

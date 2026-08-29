@@ -270,6 +270,50 @@ html, body, #root {
 }
 .shell-menu-item:hover { background: var(--panel-2); }
 
+.session-context-menu {
+  position: fixed;
+  z-index: 200;
+  background: var(--panel);
+  border: 1px solid var(--border-strong);
+  border-radius: 10px;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+  padding: 4px;
+}
+
+.session-context-menu-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 7px 12px;
+  border-radius: 7px;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-size: 12.5px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.session-context-menu-item.danger { color: var(--danger); }
+.session-context-menu-item:hover { background: var(--panel-2); }
+.session-context-menu-item:disabled { color: var(--text-faint); cursor: not-allowed; }
+.session-context-menu-item:disabled:hover { background: transparent; }
+
+.session-delete-confirm {
+  width: 320px;
+  background: var(--panel);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+  padding: 14px;
+}
+.session-delete-confirm p {
+  font-size: 12.5px;
+  color: var(--text-dim);
+  margin: 0 0 12px;
+}
+.session-delete-confirm .pane-confirm-actions { justify-content: flex-end; }
+
 .search-wrap {
   padding: 10px 16px 0;
 }
@@ -322,6 +366,12 @@ html, body, #root {
 .session-item:hover { background: var(--panel-2); border-color: var(--border); }
 .session-item.disabled { opacity: 0.35; cursor: not-allowed; }
 .session-item.open { border-color: var(--accent-soft); }
+.session-item.pinned { background: var(--panel-2); }
+
+.session-pin-icon {
+  flex-shrink: 0;
+  font-size: 10.5px;
+}
 
 .session-title {
   font-size: 12.5px;
@@ -333,6 +383,19 @@ html, body, #root {
   display: flex;
   align-items: center;
   gap: 6px;
+}
+
+.session-title-input {
+  width: 100%;
+  padding: 2px 6px;
+  border-radius: 6px;
+  border: 1px solid var(--accent);
+  background: var(--panel-2);
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-size: 12.5px;
+  font-weight: 600;
+  outline: none;
 }
 
 .session-open-tag {

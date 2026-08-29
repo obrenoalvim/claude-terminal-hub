@@ -21,13 +21,15 @@ const THEMES = {
 
 const ACTIVITY_DECAY_MS = 1500;
 
-export default function TerminalPane({ pane, focused, onFocus, onClose, onNewHere, fontSize, theme }) {
+export default function TerminalPane({ pane, focused, onFocus, onClose, onNewHere, fontSize, theme, t }) {
   const bodyRef = useRef(null);
   const termRef = useRef(null);
   const searchRef = useRef(null);
   const searchInputRef = useRef(null);
   const activityTimerRef = useRef(null);
   const activeRef = useRef(false);
+  const tRef = useRef(t);
+  tRef.current = t;
   const { paneId, title, cwd, command, shell } = pane;
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -62,14 +64,14 @@ export default function TerminalPane({ pane, focused, onFocus, onClose, onNewHer
         setStatus('idle');
       }, ACTIVITY_DECAY_MS);
       if (data.includes('\x07') && !document.hasFocus()) {
-        try { new Notification('Claude Terminal Hub', { body: `${title}: precisa de atenção` }); } catch { /* notifications may be unavailable */ }
+        try { new Notification(tRef.current('app.name'), { body: tRef.current('notification.needsAttention', { title }) }); } catch { /* notifications may be unavailable */ }
       }
     });
     const offExit = window.api.onPtyExit(paneId, () => {
       activeRef.current = false;
       setStatus('dead');
       if (!document.hasFocus()) {
-        try { new Notification('Claude Terminal Hub', { body: `${title}: terminal encerrado` }); } catch { /* notifications may be unavailable */ }
+        try { new Notification(tRef.current('app.name'), { body: tRef.current('notification.terminalClosed', { title }) }); } catch { /* notifications may be unavailable */ }
       }
     });
 
@@ -139,23 +141,23 @@ export default function TerminalPane({ pane, focused, onFocus, onClose, onNewHer
           {onNewHere && (
             <button
               className="pane-action"
-              title="Abrir novo terminal nesta pasta"
+              title={t('pane.newHere')}
               onClick={(e) => { e.stopPropagation(); onNewHere(); }}
             >
               +
             </button>
           )}
-          <button className="pane-close" title="Fechar" onClick={(e) => { e.stopPropagation(); requestClose(); }}>
+          <button className="pane-close" title={t('pane.close')} onClick={(e) => { e.stopPropagation(); requestClose(); }}>
             ✕
           </button>
         </div>
       </div>
       {confirmClose && (
         <div className="pane-confirm" onMouseDown={(e) => e.stopPropagation()}>
-          <span>Painel com atividade recente. Fechar mesmo assim?</span>
+          <span>{t('pane.confirmClose')}</span>
           <div className="pane-confirm-actions">
-            <button className="pane-confirm-cancel" onClick={() => setConfirmClose(false)}>Cancelar</button>
-            <button className="pane-confirm-ok" onClick={onClose}>Fechar</button>
+            <button className="pane-confirm-cancel" onClick={() => setConfirmClose(false)}>{t('pane.cancel')}</button>
+            <button className="pane-confirm-ok" onClick={onClose}>{t('pane.close')}</button>
           </div>
         </div>
       )}
@@ -164,7 +166,7 @@ export default function TerminalPane({ pane, focused, onFocus, onClose, onNewHer
           <input
             ref={searchInputRef}
             type="text"
-            placeholder="Buscar no terminal…"
+            placeholder={t('pane.searchPlaceholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onKeyDown={(e) => {
@@ -172,9 +174,9 @@ export default function TerminalPane({ pane, focused, onFocus, onClose, onNewHer
               else if (e.key === 'Escape') setSearchOpen(false);
             }}
           />
-          <button title="Anterior" onClick={() => runSearch('prev')}>↑</button>
-          <button title="Próxima" onClick={() => runSearch('next')}>↓</button>
-          <button title="Fechar busca" onClick={() => setSearchOpen(false)}>✕</button>
+          <button title={t('pane.searchPrev')} onClick={() => runSearch('prev')}>↑</button>
+          <button title={t('pane.searchNext')} onClick={() => runSearch('next')}>↓</button>
+          <button title={t('pane.searchClose')} onClick={() => setSearchOpen(false)}>✕</button>
         </div>
       )}
       <div className="pane-body" ref={bodyRef} />

@@ -2,7 +2,11 @@ import { contextBridge, ipcRenderer } from 'electron';
 
 contextBridge.exposeInMainWorld('api', {
   listSessions: () => ipcRenderer.invoke('sessions:list'),
+  deleteSession: (id) => ipcRenderer.invoke('sessions:delete', id),
+  renameSession: (id, name) => ipcRenderer.invoke('sessions:rename', id, name),
+  pinSession: (id, pinned) => ipcRenderer.invoke('sessions:pin', id, pinned),
   logError: (message) => ipcRenderer.send('renderer:error', message),
+  setLanguage: (lang) => ipcRenderer.send('settings:language', lang),
 
   startPty: (paneId, opts) => ipcRenderer.send('pty:start', { paneId, ...opts }),
   sendInput: (paneId, data) => ipcRenderer.send('pty:input', { paneId, data }),

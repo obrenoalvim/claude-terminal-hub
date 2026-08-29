@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Sidebar from './components/Sidebar.jsx';
 import PaneGrid from './components/PaneGrid.jsx';
 import SettingsPanel from './components/SettingsPanel.jsx';
+import { translate, DEFAULT_LANG } from '../../shared/i18n.js';
 
 const MAX_PANES = 4;
 const SIDEBAR_COLLAPSED_KEY = 'sidebarCollapsed';
@@ -12,11 +13,12 @@ const DEFAULT_FONT_SIZE = 13;
 const MIN_FONT_SIZE = 8;
 const MAX_FONT_SIZE = 28;
 const THEME_KEY = 'settings.theme';
+const LANG_KEY = 'settings.language';
 const SHELL_LABELS = {
-  powershell: 'PowerShell',
-  cmd: 'Prompt',
-  gitbash: 'Git Bash',
-  wsl: 'WSL',
+  powershell: 'shell.powershell',
+  cmd: 'shell.cmdShort',
+  gitbash: 'shell.gitbash',
+  wsl: 'shell.wsl',
 };
 
 function loadStoredPanes() {
@@ -44,6 +46,8 @@ export default function App() {
     () => Number(localStorage.getItem(FONT_SIZE_KEY)) || DEFAULT_FONT_SIZE
   );
   const [theme, setTheme] = useState(() => localStorage.getItem(THEME_KEY) || 'dark');
+  const [lang, setLang] = useState(() => localStorage.getItem(LANG_KEY) || DEFAULT_LANG);
+  const t = useCallback((key, vars) => translate(lang, key, vars), [lang]);
   const paneSeq = useRef(panes.length);
   const openSessionIds = useMemo(
     () => new Set(panes.map((p) => p.sessionId).filter(Boolean)),
@@ -62,6 +66,11 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem(SKIP_PERMISSIONS_KEY, skipPermissions ? '1' : '0');
   }, [skipPermissions]);
+
+  useEffect(() => {
+    localStorage.setItem(LANG_KEY, lang);
+    window.api.setLanguage(lang);
+  }, [lang]);
 
   useEffect(() => {
     const toStore = panes.map(({ title, cwd, command, shell, sessionId }) => ({ title, cwd, command, shell, sessionId }));
@@ -106,6 +115,10 @@ export default function App() {
     setPanes((prev) => prev.filter((p) => p.paneId !== paneId));
   }, []);
 
+  const handleSessionDeleted = useCallback((sessionId) => {
+    setPanes((prev) => prev.filter((p) => p.sessionId !== sessionId));
+  }, []);
+
   useEffect(() => {
     function handleKeydown(e) {
       if (!(e.ctrlKey || e.metaKey)) return;
@@ -113,7 +126,7 @@ export default function App() {
 
       if (key === 't') {
         e.preventDefault();
-        openPane({ title: 'PowerShell', cwd: null, command: null });
+        openPane({ title: t('shell.powershell'), cwd: null, command: null });
       } else if (key === 'w') {
         if (!focusedId) return;
         e.preventDefault();
@@ -141,7 +154,7 @@ export default function App() {
     }
     window.addEventListener('keydown', handleKeydown, true);
     return () => window.removeEventListener('keydown', handleKeydown, true);
-  }, [panes, focusedId, openPane, closePane]);
+  }, [panes, focusedId, openPane, closePane, t]);
 
   return (
     <div id="app" className={sidebarCollapsed ? 'sidebar-collapsed' : ''}>
@@ -150,9 +163,12 @@ export default function App() {
         onToggleCollapse={() => setSidebarCollapsed((c) => !c)}
         onOpenSession={openSession}
         openSessionIds={openSessionIds}
-        onNewShell={(shell) => openPane({ title: SHELL_LABELS[shell] || 'PowerShell', cwd: null, command: null, shell })}
+        onNewShell={(shell) => openPane({ title: t(SHELL_LABELS[shell]) || t('shell.powershell'), cwd: null, command: null, shell })}
+        onOpenTerminalHere={(session) => openPane({ title: session.project, cwd: session.cwd, command: null })}
         canOpen={panes.length < MAX_PANES}
         onOpenSettings={() => setSettingsOpen(true)}
+        onSessionDeleted={handleSessionDeleted}
+        t={t}
       />
       {settingsOpen && (
         <SettingsPanel
@@ -160,7 +176,10 @@ export default function App() {
           onChangeSkipPermissions={setSkipPermissions}
           theme={theme}
           onChangeTheme={setTheme}
+          lang={lang}
+          onChangeLang={setLang}
           onClose={() => setSettingsOpen(false)}
+          t={t}
         />
       )}
       <PaneGrid
@@ -172,6 +191,7 @@ export default function App() {
         canOpen={panes.length < MAX_PANES}
         fontSize={fontSize}
         theme={theme}
+        t={t}
       />
     </div>
   );
