@@ -64,4 +64,15 @@ export default {
   'update.downloaded.message': 'Claude Terminal Hub {version} was downloaded. Restart now to install?',
   'update.downloaded.now': 'Restart now',
   'update.downloaded.later': 'Later',
+
+  'settings.updates.title': 'Updates',
+  'settings.updates.check': 'Check for updates',
+  'settings.updates.updateAll': 'Update everything automatically',
+  'settings.updates.checking': 'Checking…',
+  'settings.updates.upToDate': 'You have the latest version.',
+  'settings.updates.available': 'Version {version} available.',
+  'settings.updates.downloading': 'Downloading… {percent}%',
+  'settings.updates.downloaded': 'Version {version} downloaded, restarting…',
+  'settings.updates.error': 'Update check failed: {message}',
+  'settings.updates.devMode': 'Updates are only available in the installed app.',
 };

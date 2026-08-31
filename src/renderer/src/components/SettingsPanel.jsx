@@ -1,4 +1,18 @@
-export default function SettingsPanel({ skipPermissions, onChangeSkipPermissions, theme, onChangeTheme, lang, onChangeLang, onClose, t }) {
+function updateStatusText(status, t) {
+  switch (status.state) {
+    case 'checking': return t('settings.updates.checking');
+    case 'not-available': return t('settings.updates.upToDate');
+    case 'available': return t('settings.updates.available', { version: status.version });
+    case 'downloading': return t('settings.updates.downloading', { percent: Math.round(status.percent ?? 0) });
+    case 'downloaded': return t('settings.updates.downloaded', { version: status.version });
+    case 'error': return t('settings.updates.error', { message: status.message });
+    case 'dev': return t('settings.updates.devMode');
+    default: return '';
+  }
+}
+
+export default function SettingsPanel({ skipPermissions, onChangeSkipPermissions, theme, onChangeTheme, lang, onChangeLang, onClose, updateStatus, onCheckUpdates, onUpdateAll, t }) {
+  const busy = updateStatus.state === 'checking' || updateStatus.state === 'downloading';
   return (
     <div className="settings-overlay" onClick={onClose}>
       <div className="settings-panel" onClick={(e) => e.stopPropagation()}>
@@ -39,6 +53,16 @@ export default function SettingsPanel({ skipPermissions, onChangeSkipPermissions
             <div className="settings-row-sub">{t('settings.language.sub')}</div>
           </div>
         </label>
+        <div className="settings-row settings-updates">
+          <div className="settings-row-title">{t('settings.updates.title')}</div>
+          <div className="settings-updates-actions">
+            <button type="button" disabled={busy} onClick={onCheckUpdates}>{t('settings.updates.check')}</button>
+            <button type="button" disabled={busy} onClick={onUpdateAll}>{t('settings.updates.updateAll')}</button>
+          </div>
+          {updateStatus.state !== 'idle' && (
+            <div className="settings-row-sub">{updateStatusText(updateStatus, t)}</div>
+          )}
+        </div>
       </div>
     </div>
   );

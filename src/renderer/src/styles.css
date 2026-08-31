@@ -201,6 +201,29 @@ html, body, #root {
   margin-top: 2px;
 }
 
+.settings-updates {
+  flex-direction: column;
+  align-items: stretch;
+  cursor: default;
+}
+.settings-updates-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+}
+.settings-updates-actions button {
+  flex: 1;
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--border-strong);
+  background: var(--panel-2);
+  color: var(--text);
+  font-size: 11.5px;
+  cursor: pointer;
+}
+.settings-updates-actions button:hover:not(:disabled) { background: var(--panel); }
+.settings-updates-actions button:disabled { opacity: 0.5; cursor: default; }
+
 .new-shell-wrap {
   position: relative;
   display: flex;

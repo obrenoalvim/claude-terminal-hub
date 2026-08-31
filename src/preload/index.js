@@ -8,6 +8,14 @@ contextBridge.exposeInMainWorld('api', {
   logError: (message) => ipcRenderer.send('renderer:error', message),
   setLanguage: (lang) => ipcRenderer.send('settings:language', lang),
 
+  checkForUpdates: () => ipcRenderer.invoke('update:check'),
+  updateAll: () => ipcRenderer.invoke('update:runAll'),
+  onUpdateStatus: (callback) => {
+    const listener = (event, status) => callback(status);
+    ipcRenderer.on('update:status', listener);
+    return () => ipcRenderer.removeListener('update:status', listener);
+  },
+
   startPty: (paneId, opts) => ipcRenderer.send('pty:start', { paneId, ...opts }),
   sendInput: (paneId, data) => ipcRenderer.send('pty:input', { paneId, data }),
   resizePty: (paneId, cols, rows) => ipcRenderer.send('pty:resize', { paneId, cols, rows }),

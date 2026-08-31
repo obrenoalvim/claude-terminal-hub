@@ -47,6 +47,7 @@ export default function App() {
   );
   const [theme, setTheme] = useState(() => localStorage.getItem(THEME_KEY) || 'dark');
   const [lang, setLang] = useState(() => localStorage.getItem(LANG_KEY) || DEFAULT_LANG);
+  const [updateStatus, setUpdateStatus] = useState({ state: 'idle' });
   const t = useCallback((key, vars) => translate(lang, key, vars), [lang]);
   const paneSeq = useRef(panes.length);
   const openSessionIds = useMemo(
@@ -80,6 +81,18 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem(FONT_SIZE_KEY, String(fontSize));
   }, [fontSize]);
+
+  useEffect(() => window.api.onUpdateStatus(setUpdateStatus), []);
+
+  const checkForUpdates = useCallback(async () => {
+    const res = await window.api.checkForUpdates();
+    if (!res.ok) setUpdateStatus({ state: 'dev' });
+  }, []);
+
+  const updateAll = useCallback(async () => {
+    const res = await window.api.updateAll();
+    if (!res.ok) setUpdateStatus({ state: 'dev' });
+  }, []);
 
   const openPane = useCallback(({ title, cwd, command, shell, sessionId }) => {
     setPanes((prev) => {
@@ -179,6 +192,9 @@ export default function App() {
           lang={lang}
           onChangeLang={setLang}
           onClose={() => setSettingsOpen(false)}
+          updateStatus={updateStatus}
+          onCheckUpdates={checkForUpdates}
+          onUpdateAll={updateAll}
           t={t}
         />
       )}

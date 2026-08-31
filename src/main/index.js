@@ -11,6 +11,14 @@ log.errorHandler.startCatching();
 const isDev = !app.isPackaged;
 const iconPath = join(__dirname, '../../build/icon.ico');
 let currentLang = DEFAULT_LANG;
+let mainWindow = null;
+let autoInstallFlow = false;
+
+function sendUpdateStatus(state, payload) {
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.webContents.send('update:status', { state, ...payload });
+  }
+}
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -27,6 +35,7 @@ function createWindow() {
       nodeIntegration: false,
     },
   });
+  mainWindow = win;
 
   if (isDev && process.env.ELECTRON_RENDERER_URL) {
     win.loadURL(process.env.ELECTRON_RENDERER_URL);
@@ -40,6 +49,18 @@ function createWindow() {
   ipcMain.handle('sessions:pin', (event, id, pinned) => pinSession(id, pinned));
   ipcMain.on('renderer:error', (event, message) => log.error('[renderer]', message));
   ipcMain.on('settings:language', (event, lang) => { currentLang = lang; });
+  ipcMain.handle('update:check', () => {
+    if (!app.isPackaged) return { ok: false, reason: 'dev' };
+    autoInstallFlow = false;
+    autoUpdater.checkForUpdates();
+    return { ok: true };
+  });
+  ipcMain.handle('update:runAll', () => {
+    if (!app.isPackaged) return { ok: false, reason: 'dev' };
+    autoInstallFlow = true;
+    autoUpdater.checkForUpdates();
+    return { ok: true };
+  });
 
   ipcMain.on('pty:start', (event, { paneId, cwd, cols, rows, command, shell }) => {
     startPty(
@@ -58,7 +79,14 @@ function createWindow() {
 
 autoUpdater.autoDownload = false;
 
+autoUpdater.on('checking-for-update', () => sendUpdateStatus('checking'));
+
 autoUpdater.on('update-available', (info) => {
+  sendUpdateStatus('available', { version: info.version });
+  if (autoInstallFlow) {
+    autoUpdater.downloadUpdate();
+    return;
+  }
   dialog
     .showMessageBox({
       type: 'info',
@@ -73,7 +101,22 @@ autoUpdater.on('update-available', (info) => {
     });
 });
 
+autoUpdater.on('update-not-available', () => {
+  sendUpdateStatus('not-available');
+  autoInstallFlow = false;
+});
+
+autoUpdater.on('download-progress', (progress) => {
+  sendUpdateStatus('downloading', { percent: progress.percent });
+});
+
 autoUpdater.on('update-downloaded', (info) => {
+  sendUpdateStatus('downloaded', { version: info.version });
+  if (autoInstallFlow) {
+    autoInstallFlow = false;
+    autoUpdater.quitAndInstall();
+    return;
+  }
   dialog
     .showMessageBox({
       type: 'info',
@@ -86,6 +129,12 @@ autoUpdater.on('update-downloaded', (info) => {
     .then(({ response }) => {
       if (response === 0) autoUpdater.quitAndInstall();
     });
+});
+
+autoUpdater.on('error', (err) => {
+  log.error('[autoUpdater]', err);
+  sendUpdateStatus('error', { message: err?.message || String(err) });
+  autoInstallFlow = false;
 });
 
 app.whenReady().then(() => {
