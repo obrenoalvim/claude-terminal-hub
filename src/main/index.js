@@ -61,6 +61,14 @@ function createWindow() {
     autoUpdater.checkForUpdates();
     return { ok: true };
   });
+  ipcMain.handle('dialog:selectFolder', async (event, defaultPath) => {
+    const result = await dialog.showOpenDialog(win, {
+      properties: ['openDirectory'],
+      defaultPath: defaultPath || undefined,
+    });
+    if (result.canceled || !result.filePaths.length) return null;
+    return result.filePaths[0];
+  });
 
   ipcMain.on('pty:start', (event, { paneId, cwd, cols, rows, command, shell }) => {
     startPty(

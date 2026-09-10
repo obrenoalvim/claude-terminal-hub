@@ -40,6 +40,11 @@ export default {
   'settings.theme.sub': 'Unchecked uses the default dark theme',
   'settings.language.title': 'Portuguese',
   'settings.language.sub': 'Unchecked uses English (default)',
+  'settings.defaultPath.title': 'Default folder for new terminals',
+  'settings.defaultPath.sub': 'Used when opening a terminal without a specific folder. Empty uses your user folder.',
+  'settings.defaultPath.placeholder': 'e.g. C:\\Users\\you\\projects',
+  'settings.defaultPath.browse': 'Browse…',
+  'settings.defaultPath.reset': 'Reset',
 
   'pane.newHere': 'Open new terminal in this folder',
   'pane.close': 'Close',

@@ -11,8 +11,12 @@ function updateStatusText(status, t) {
   }
 }
 
-export default function SettingsPanel({ skipPermissions, onChangeSkipPermissions, theme, onChangeTheme, lang, onChangeLang, onClose, updateStatus, onCheckUpdates, onUpdateAll, t }) {
+export default function SettingsPanel({ skipPermissions, onChangeSkipPermissions, theme, onChangeTheme, lang, onChangeLang, defaultCwd, onChangeDefaultCwd, onClose, updateStatus, onCheckUpdates, onUpdateAll, t }) {
   const busy = updateStatus.state === 'checking' || updateStatus.state === 'downloading';
+  const browseForDefaultCwd = async () => {
+    const picked = await window.api.selectFolder(defaultCwd || undefined);
+    if (picked) onChangeDefaultCwd(picked);
+  };
   return (
     <div className="settings-overlay" onClick={onClose}>
       <div className="settings-panel" onClick={(e) => e.stopPropagation()}>
@@ -53,6 +57,21 @@ export default function SettingsPanel({ skipPermissions, onChangeSkipPermissions
             <div className="settings-row-sub">{t('settings.language.sub')}</div>
           </div>
         </label>
+        <div className="settings-row settings-updates">
+          <div className="settings-row-title">{t('settings.defaultPath.title')}</div>
+          <div className="settings-row-sub">{t('settings.defaultPath.sub')}</div>
+          <input
+            type="text"
+            className="settings-path-input"
+            value={defaultCwd}
+            placeholder={t('settings.defaultPath.placeholder')}
+            onChange={(e) => onChangeDefaultCwd(e.target.value)}
+          />
+          <div className="settings-updates-actions">
+            <button type="button" onClick={browseForDefaultCwd}>{t('settings.defaultPath.browse')}</button>
+            <button type="button" onClick={() => onChangeDefaultCwd('')}>{t('settings.defaultPath.reset')}</button>
+          </div>
+        </div>
         <div className="settings-row settings-updates">
           <div className="settings-row-title">{t('settings.updates.title')}</div>
           <div className="settings-updates-actions">

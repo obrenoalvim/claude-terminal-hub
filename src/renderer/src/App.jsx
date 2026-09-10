@@ -14,6 +14,7 @@ const MIN_FONT_SIZE = 8;
 const MAX_FONT_SIZE = 28;
 const THEME_KEY = 'settings.theme';
 const LANG_KEY = 'settings.language';
+const DEFAULT_CWD_KEY = 'settings.defaultCwd';
 const SHELL_LABELS = {
   powershell: 'shell.powershell',
   cmd: 'shell.cmdShort',
@@ -47,6 +48,7 @@ export default function App() {
   );
   const [theme, setTheme] = useState(() => localStorage.getItem(THEME_KEY) || 'dark');
   const [lang, setLang] = useState(() => localStorage.getItem(LANG_KEY) || DEFAULT_LANG);
+  const [defaultCwd, setDefaultCwd] = useState(() => localStorage.getItem(DEFAULT_CWD_KEY) || '');
   const [updateStatus, setUpdateStatus] = useState({ state: 'idle' });
   const t = useCallback((key, vars) => translate(lang, key, vars), [lang]);
   const paneSeq = useRef(panes.length);
@@ -72,6 +74,10 @@ export default function App() {
     localStorage.setItem(LANG_KEY, lang);
     window.api.setLanguage(lang);
   }, [lang]);
+
+  useEffect(() => {
+    localStorage.setItem(DEFAULT_CWD_KEY, defaultCwd);
+  }, [defaultCwd]);
 
   useEffect(() => {
     const toStore = panes.map(({ title, cwd, command, shell, sessionId }) => ({ title, cwd, command, shell, sessionId }));
@@ -139,7 +145,7 @@ export default function App() {
 
       if (key === 't') {
         e.preventDefault();
-        openPane({ title: t('shell.powershell'), cwd: null, command: null });
+        openPane({ title: t('shell.powershell'), cwd: defaultCwd || null, command: null });
       } else if (key === 'w') {
         if (!focusedId) return;
         e.preventDefault();
@@ -167,7 +173,7 @@ export default function App() {
     }
     window.addEventListener('keydown', handleKeydown, true);
     return () => window.removeEventListener('keydown', handleKeydown, true);
-  }, [panes, focusedId, openPane, closePane, t]);
+  }, [panes, focusedId, openPane, closePane, t, defaultCwd]);
 
   return (
     <div id="app" className={sidebarCollapsed ? 'sidebar-collapsed' : ''}>
@@ -176,7 +182,7 @@ export default function App() {
         onToggleCollapse={() => setSidebarCollapsed((c) => !c)}
         onOpenSession={openSession}
         openSessionIds={openSessionIds}
-        onNewShell={(shell) => openPane({ title: t(SHELL_LABELS[shell]) || t('shell.powershell'), cwd: null, command: null, shell })}
+        onNewShell={(shell) => openPane({ title: t(SHELL_LABELS[shell]) || t('shell.powershell'), cwd: defaultCwd || null, command: null, shell })}
         onOpenTerminalHere={(session) => openPane({ title: session.project, cwd: session.cwd, command: null })}
         canOpen={panes.length < MAX_PANES}
         onOpenSettings={() => setSettingsOpen(true)}
@@ -191,6 +197,8 @@ export default function App() {
           onChangeTheme={setTheme}
           lang={lang}
           onChangeLang={setLang}
+          defaultCwd={defaultCwd}
+          onChangeDefaultCwd={setDefaultCwd}
           onClose={() => setSettingsOpen(false)}
           updateStatus={updateStatus}
           onCheckUpdates={checkForUpdates}

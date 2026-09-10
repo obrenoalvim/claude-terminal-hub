@@ -10,6 +10,7 @@ contextBridge.exposeInMainWorld('api', {
 
   checkForUpdates: () => ipcRenderer.invoke('update:check'),
   updateAll: () => ipcRenderer.invoke('update:runAll'),
+  selectFolder: (defaultPath) => ipcRenderer.invoke('dialog:selectFolder', defaultPath),
   onUpdateStatus: (callback) => {
     const listener = (event, status) => callback(status);
     ipcRenderer.on('update:status', listener);

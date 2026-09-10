@@ -40,6 +40,11 @@ export default {
   'settings.theme.sub': 'Desmarcado usa o tema escuro padrão',
   'settings.language.title': 'Português',
   'settings.language.sub': 'Desmarcado usa inglês (padrão)',
+  'settings.defaultPath.title': 'Pasta padrão para novos terminais',
+  'settings.defaultPath.sub': 'Usada ao abrir um terminal sem pasta específica. Vazio usa a pasta do usuário.',
+  'settings.defaultPath.placeholder': 'ex: C:\\Users\\voce\\projetos',
+  'settings.defaultPath.browse': 'Procurar…',
+  'settings.defaultPath.reset': 'Restaurar',
 
   'pane.newHere': 'Abrir novo terminal nesta pasta',
   'pane.close': 'Fechar',
