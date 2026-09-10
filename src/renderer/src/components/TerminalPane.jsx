@@ -77,6 +77,10 @@ export default function TerminalPane({ pane, focused, onFocus, onClose, onNewHer
 
     const onInput = term.onData((data) => window.api.sendInput(paneId, data));
     const onResize = term.onResize(({ cols, rows }) => window.api.resizePty(paneId, cols, rows));
+    const onSelection = term.onSelectionChange(() => {
+      const sel = term.getSelection();
+      if (sel) navigator.clipboard.writeText(sel).catch(() => {});
+    });
 
     const resizeObserver = new ResizeObserver(() => fit.fit());
     resizeObserver.observe(bodyRef.current);
@@ -88,6 +92,7 @@ export default function TerminalPane({ pane, focused, onFocus, onClose, onNewHer
       resizeObserver.disconnect();
       onInput.dispose();
       onResize.dispose();
+      onSelection.dispose();
       offData();
       offExit();
       window.api.killPty(paneId);
