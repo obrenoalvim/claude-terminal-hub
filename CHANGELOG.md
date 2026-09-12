@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.5.4]
+
+### Fixed
+- Right Ctrl shortcut never fired while a terminal pane had focus (xterm's hidden input textarea was misread as a typing target, blocking it exactly where it's needed).
+
 ## [0.5.3]
 
 ### Added

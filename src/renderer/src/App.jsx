@@ -179,7 +179,9 @@ export default function App() {
     const state = { pressed: false, otherKey: false };
     const isTypingTarget = () => {
       const el = document.activeElement;
-      return !!el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.isContentEditable);
+      if (!el) return false;
+      if (el.classList?.contains('xterm-helper-textarea')) return false;
+      return el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.isContentEditable;
     };
     function handleKeyDown(e) {
       if (e.code === 'ControlRight') {
