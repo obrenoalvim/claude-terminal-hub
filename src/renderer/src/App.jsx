@@ -175,6 +175,39 @@ export default function App() {
     return () => window.removeEventListener('keydown', handleKeydown, true);
   }, [panes, focusedId, openPane, closePane, t, defaultCwd]);
 
+  useEffect(() => {
+    const state = { pressed: false, otherKey: false };
+    const isTypingTarget = () => {
+      const el = document.activeElement;
+      return !!el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.isContentEditable);
+    };
+    function handleKeyDown(e) {
+      if (e.code === 'ControlRight') {
+        if (!state.pressed) {
+          state.pressed = true;
+          state.otherKey = false;
+        }
+        return;
+      }
+      if (state.pressed) state.otherKey = true;
+    }
+    function handleKeyUp(e) {
+      if (e.code !== 'ControlRight') return;
+      const wasTap = state.pressed && !state.otherKey;
+      state.pressed = false;
+      state.otherKey = false;
+      if (!wasTap || !focusedId || settingsOpen || isTypingTarget()) return;
+      const cmd = `claude${skipPermissions ? ' --dangerously-skip-permissions' : ''}`;
+      window.api.sendInput(focusedId, `${cmd}\r`);
+    }
+    window.addEventListener('keydown', handleKeyDown, true);
+    window.addEventListener('keyup', handleKeyUp, true);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown, true);
+      window.removeEventListener('keyup', handleKeyUp, true);
+    };
+  }, [focusedId, settingsOpen, skipPermissions]);
+
   return (
     <div id="app" className={sidebarCollapsed ? 'sidebar-collapsed' : ''}>
       <Sidebar
