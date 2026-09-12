@@ -48,7 +48,8 @@ export default {
 
   'pane.newHere': 'Open new terminal in this folder',
   'pane.close': 'Close',
-  'pane.confirmClose': 'Pane has recent activity. Close anyway?',
+  'pane.confirmClose': 'Close this pane?',
+  'pane.keepRunning': 'Close and keep running',
   'pane.cancel': 'Cancel',
   'pane.searchPlaceholder': 'Search terminal…',
   'pane.searchPrev': 'Previous',

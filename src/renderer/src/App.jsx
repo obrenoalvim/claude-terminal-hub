@@ -22,6 +22,10 @@ const SHELL_LABELS = {
   wsl: 'shell.wsl',
 };
 
+function visibleCount(list) {
+  return list.filter((p) => !p.hidden).length;
+}
+
 function loadStoredPanes() {
   try {
     const parsed = JSON.parse(localStorage.getItem(PANES_KEY) || '[]');
@@ -80,7 +84,7 @@ export default function App() {
   }, [defaultCwd]);
 
   useEffect(() => {
-    const toStore = panes.map(({ title, cwd, command, shell, sessionId }) => ({ title, cwd, command, shell, sessionId }));
+    const toStore = panes.map(({ title, cwd, command, shell, sessionId, hidden }) => ({ title, cwd, command, shell, sessionId, hidden }));
     localStorage.setItem(PANES_KEY, JSON.stringify(toStore));
   }, [panes]);
 
@@ -102,21 +106,26 @@ export default function App() {
 
   const openPane = useCallback(({ title, cwd, command, shell, sessionId }) => {
     setPanes((prev) => {
-      if (prev.length >= MAX_PANES) return prev;
+      if (visibleCount(prev) >= MAX_PANES) return prev;
       const paneId = `pane-${++paneSeq.current}`;
       setFocusedId(paneId);
-      return [...prev, { paneId, title, cwd: cwd || null, command: command || null, shell: shell || null, sessionId: sessionId || null }];
+      return [...prev, { paneId, title, cwd: cwd || null, command: command || null, shell: shell || null, sessionId: sessionId || null, hidden: false }];
     });
   }, []);
 
   const openSession = useCallback((session) => {
     setPanes((prev) => {
-      const existing = prev.find((p) => p.sessionId === session.id);
-      if (existing) {
+      const idx = prev.findIndex((p) => p.sessionId === session.id);
+      if (idx !== -1) {
+        const existing = prev[idx];
         setFocusedId(existing.paneId);
-        return prev;
+        if (!existing.hidden) return prev;
+        if (visibleCount(prev) >= MAX_PANES) return prev;
+        const next = [...prev];
+        next[idx] = { ...existing, hidden: false };
+        return next;
       }
-      if (prev.length >= MAX_PANES) return prev;
+      if (visibleCount(prev) >= MAX_PANES) return prev;
       const paneId = `pane-${++paneSeq.current}`;
       setFocusedId(paneId);
       return [...prev, {
@@ -126,12 +135,25 @@ export default function App() {
         command: `claude --resume ${session.id}${skipPermissions ? ' --dangerously-skip-permissions' : ''}`,
         shell: null,
         sessionId: session.id,
+        hidden: false,
       }];
     });
   }, [skipPermissions]);
 
   const closePane = useCallback((paneId) => {
     setPanes((prev) => prev.filter((p) => p.paneId !== paneId));
+  }, []);
+
+  const hidePane = useCallback((paneId) => {
+    setPanes((prev) => {
+      const next = prev.map((p) => (p.paneId === paneId ? { ...p, hidden: true } : p));
+      setFocusedId((prevFocused) => {
+        if (prevFocused !== paneId) return prevFocused;
+        const remaining = next.filter((p) => !p.hidden);
+        return remaining.length ? remaining[remaining.length - 1].paneId : null;
+      });
+      return next;
+    });
   }, []);
 
   const handleSessionDeleted = useCallback((sessionId) => {
@@ -219,7 +241,7 @@ export default function App() {
         openSessionIds={openSessionIds}
         onNewShell={(shell) => openPane({ title: t(SHELL_LABELS[shell]) || t('shell.powershell'), cwd: defaultCwd || null, command: null, shell })}
         onOpenTerminalHere={(session) => openPane({ title: session.project, cwd: session.cwd, command: null })}
-        canOpen={panes.length < MAX_PANES}
+        canOpen={visibleCount(panes) < MAX_PANES}
         onOpenSettings={() => setSettingsOpen(true)}
         onSessionDeleted={handleSessionDeleted}
         t={t}
@@ -246,8 +268,9 @@ export default function App() {
         focusedId={focusedId}
         onFocus={setFocusedId}
         onClose={closePane}
+        onHide={hidePane}
         onNewHere={(cwd, title) => openPane({ title, cwd, command: null })}
-        canOpen={panes.length < MAX_PANES}
+        canOpen={visibleCount(panes) < MAX_PANES}
         fontSize={fontSize}
         theme={theme}
         t={t}

@@ -48,7 +48,8 @@ export default {
 
   'pane.newHere': 'Abrir novo terminal nesta pasta',
   'pane.close': 'Fechar',
-  'pane.confirmClose': 'Painel com atividade recente. Fechar mesmo assim?',
+  'pane.confirmClose': 'Fechar este painel?',
+  'pane.keepRunning': 'Fechar e continuar executando',
   'pane.cancel': 'Cancelar',
   'pane.searchPlaceholder': 'Buscar no terminal…',
   'pane.searchPrev': 'Anterior',

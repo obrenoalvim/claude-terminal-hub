@@ -494,6 +494,8 @@ html, body, #root {
 .pane-grid.layout-3 .pane:first-child { grid-row: 1 / 3; }
 .pane-grid.layout-4 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
 
+.pane-background { display: none; }
+
 .empty-state {
   position: absolute;
   inset: 14px;
@@ -578,6 +580,8 @@ html, body, #root {
   cursor: pointer;
 }
 .pane-confirm-cancel:hover { border-color: var(--border-strong); }
+.pane-confirm-keep { border-color: var(--accent); color: var(--accent); }
+.pane-confirm-keep:hover { background: var(--accent-soft); }
 .pane-confirm-ok { border-color: var(--danger); color: var(--danger); }
 .pane-confirm-ok:hover { background: rgba(255, 107, 107, 0.1); }
 

@@ -21,13 +21,16 @@ const THEMES = {
 
 const ACTIVITY_DECAY_MS = 1500;
 
-export default function TerminalPane({ pane, focused, onFocus, onClose, onNewHere, fontSize, theme, t }) {
+export default function TerminalPane({ pane, hidden, focused, onFocus, onClose, onHide, onNewHere, fontSize, theme, t }) {
   const bodyRef = useRef(null);
   const termRef = useRef(null);
+  const fitRef = useRef(null);
   const searchRef = useRef(null);
   const searchInputRef = useRef(null);
   const activityTimerRef = useRef(null);
   const activeRef = useRef(false);
+  const hiddenRef = useRef(hidden);
+  hiddenRef.current = hidden;
   const tRef = useRef(t);
   tRef.current = t;
   const { paneId, title, cwd, command, shell } = pane;
@@ -45,6 +48,7 @@ export default function TerminalPane({ pane, focused, onFocus, onClose, onNewHer
     });
     termRef.current = term;
     const fit = new FitAddon();
+    fitRef.current = fit;
     const search = new SearchAddon();
     searchRef.current = search;
     term.loadAddon(fit);
@@ -82,7 +86,9 @@ export default function TerminalPane({ pane, focused, onFocus, onClose, onNewHer
       if (sel) navigator.clipboard.writeText(sel).catch(() => {});
     });
 
-    const resizeObserver = new ResizeObserver(() => fit.fit());
+    const resizeObserver = new ResizeObserver(() => {
+      if (!hiddenRef.current) fit.fit();
+    });
     resizeObserver.observe(bodyRef.current);
 
     term.focus();
@@ -111,6 +117,10 @@ export default function TerminalPane({ pane, focused, onFocus, onClose, onNewHer
   }, [theme]);
 
   useEffect(() => {
+    if (!hidden) fitRef.current?.fit();
+  }, [hidden]);
+
+  useEffect(() => {
     function onToggleSearch(e) {
       if (e.detail?.paneId !== paneId) return;
       setSearchOpen((open) => !open);
@@ -130,10 +140,7 @@ export default function TerminalPane({ pane, focused, onFocus, onClose, onNewHer
     else searchRef.current?.findPrevious(searchQuery);
   };
 
-  const requestClose = () => {
-    if (activeRef.current) setConfirmClose(true);
-    else onClose();
-  };
+  const requestClose = () => setConfirmClose(true);
 
   return (
     <div className={`pane${focused ? ' focused' : ''}`} onMouseDown={onFocus}>
@@ -162,6 +169,7 @@ export default function TerminalPane({ pane, focused, onFocus, onClose, onNewHer
           <span>{t('pane.confirmClose')}</span>
           <div className="pane-confirm-actions">
             <button className="pane-confirm-cancel" onClick={() => setConfirmClose(false)}>{t('pane.cancel')}</button>
+            <button className="pane-confirm-keep" onClick={() => { setConfirmClose(false); onHide(); }}>{t('pane.keepRunning')}</button>
             <button className="pane-confirm-ok" onClick={onClose}>{t('pane.close')}</button>
           </div>
         </div>
