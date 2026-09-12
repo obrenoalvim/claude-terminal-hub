@@ -145,10 +145,15 @@ autoUpdater.on('error', (err) => {
   autoInstallFlow = false;
 });
 
+const UPDATE_CHECK_INTERVAL_MS = 4 * 60 * 60 * 1000;
+
 app.whenReady().then(() => {
   log.info(`Claude Terminal Hub ${app.getVersion()} starting`);
   createWindow();
-  if (app.isPackaged) autoUpdater.checkForUpdates();
+  if (app.isPackaged) {
+    autoUpdater.checkForUpdates();
+    setInterval(() => autoUpdater.checkForUpdates(), UPDATE_CHECK_INTERVAL_MS);
+  }
 });
 
 app.on('window-all-closed', () => {
