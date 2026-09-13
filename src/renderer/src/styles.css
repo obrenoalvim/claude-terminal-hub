@@ -569,6 +569,7 @@ html, body, #root {
 }
 
 .pane-confirm-cancel,
+.pane-confirm-keep,
 .pane-confirm-ok {
   border-radius: 7px;
   border: 1px solid var(--border);
@@ -580,8 +581,8 @@ html, body, #root {
   cursor: pointer;
 }
 .pane-confirm-cancel:hover { border-color: var(--border-strong); }
-.pane-confirm-keep { border-color: var(--accent); color: var(--accent); }
-.pane-confirm-keep:hover { background: var(--accent-soft); }
+.pane-confirm-keep { border-color: #4ade80; color: #4ade80; }
+.pane-confirm-keep:hover { background: rgba(74, 222, 128, 0.1); }
 .pane-confirm-ok { border-color: var(--danger); color: var(--danger); }
 .pane-confirm-ok:hover { background: rgba(255, 107, 107, 0.1); }
 
