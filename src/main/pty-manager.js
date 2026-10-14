@@ -25,6 +25,14 @@ function resolveShell(shell) {
   return SHELL_OPTIONS[shell] || SHELL;
 }
 
+// xterm.js renders truecolor, but a GUI-launched Electron env carries no hint of it
+// (no TERM/COLORTERM/WT_SESSION on Windows), so CLIs like Claude Code fall back to no color.
+function ptyEnv() {
+  const env = { ...process.env, TERM: 'xterm-256color', COLORTERM: 'truecolor', FORCE_COLOR: '3' };
+  delete env.NO_COLOR;
+  return env;
+}
+
 const ptys = new Map(); // paneId -> pty process
 
 export function startPty(paneId, { cwd, cols, rows, command, shell }, onData, onExit) {
@@ -38,7 +46,7 @@ export function startPty(paneId, { cwd, cols, rows, command, shell }, onData, on
       cols: cols || 80,
       rows: rows || 24,
       cwd: resolvedCwd,
-      env: process.env,
+      env: ptyEnv(),
     });
   } catch (err) {
     log.error(`Failed to spawn shell for pane ${paneId}`, err);
