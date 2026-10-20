@@ -35,7 +35,7 @@ The installer lets you pick the install directory and adds Desktop and Start Men
 ## Features
 
 - **Cross-project session list**: scans `~/.claude/projects/*.jsonl` directly, no config needed. Searchable, sorted by most recent activity. Clicking a session already open in a pane focuses it instead of opening a duplicate.
-- **Full-text search across conversations**: type in the search box and, besides matching titles and folders, the app searches what was said in every session (your prompts, Claude's replies and the tool calls). Matching sessions show up under "In conversations" with the snippet highlighted, and one click resumes them. Prefixes, small typos and accents are handled (`acao` finds "ação").
+- **Full-text search across conversations**: type in the search box and, besides matching titles and folders, the app searches what was said in every session (your prompts, Claude's replies and the tool calls). Matching sessions show up under "In conversations" with the snippet highlighted, and one click resumes them. Prefixes, small typos and accents are handled (`acao` finds "ação"). This is the search of [**Recall**](https://github.com/obrenoalvim/recall), built in, so there is nothing else to install.
 - **One click to resume**: opens a new pane in the right folder and runs `claude --resume` for you.
 - **Up to 4 terminal panes at once**, all visible together in a grid that reflows as you open and close panes (1, 2, 3, or 4), never hidden behind tabs. Real PTYs via `node-pty`, full interactivity: arrow keys, `vim`, Claude Code's own TUI, all work normally.
 - **Panes survive an app restart**: what was open gets reopened (same folder/command) the next time you launch the app.
@@ -125,6 +125,9 @@ It reads the `.jsonl` transcripts Claude Code writes under `~/.claude/projects`.
 
 **Does it work on macOS or Linux?**
 It was built and tested on Windows. See [Requirements](#requirements).
+
+**Is the conversation search the same as Recall?**
+Yes. [Recall](https://github.com/obrenoalvim/recall) is the same search as a small standalone app, for people who only want to search their sessions. The Hub includes it from v0.6.0, in the sidebar search box.
 
 **Why only four panes?**
 By design, to keep the layout readable.

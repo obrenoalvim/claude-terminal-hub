@@ -35,7 +35,7 @@ O instalador deixa escolher a pasta de instalação e cria atalhos na Área de T
 ## Funcionalidades
 
 - **Lista de sessões entre projetos**: lê `~/.claude/projects/*.jsonl` direto, sem precisar configurar nada. Com busca, ordenado por atividade mais recente. Clicar numa sessão que já tá aberta num painel só foca ele, sem duplicar.
-- **Busca em texto completo nas conversas**: digite na caixa de busca e, além de bater título e pasta, o app procura o que foi dito em todas as sessões (seus prompts, as respostas do Claude e as chamadas de ferramenta). As sessões que batem aparecem em "Nas conversas" com o trecho destacado, e um clique retoma. Prefixos, pequenos erros de digitação e acentos são tratados (`acao` acha "ação").
+- **Busca em texto completo nas conversas**: digite na caixa de busca e, além de bater título e pasta, o app procura o que foi dito em todas as sessões (seus prompts, as respostas do Claude e as chamadas de ferramenta). As sessões que batem aparecem em "Nas conversas" com o trecho destacado, e um clique retoma. Prefixos, pequenos erros de digitação e acentos são tratados (`acao` acha "ação"). É a busca do [**Recall**](https://github.com/obrenoalvim/recall), já integrada, então não há mais nada para instalar.
 - **Um clique pra retomar**: abre um painel novo na pasta certa e já roda `claude --resume` pra você.
 - **Até 4 painéis de terminal ao mesmo tempo**, todos visíveis juntos num grid que se reorganiza conforme você abre e fecha painéis (1, 2, 3 ou 4), nunca escondido atrás de abas. PTYs de verdade via `node-pty`, totalmente interativos: setas, `vim`, a própria TUI do Claude Code, tudo funciona normal.
 - **Painéis sobrevivem a um restart do app**: o que tava aberto reabre (mesma pasta/comando) na próxima vez que você abrir o app.
@@ -125,6 +125,9 @@ Lê as transcrições `.jsonl` que o Claude Code grava em `~/.claude/projects`. 
 
 **Funciona no macOS ou Linux?**
 Foi construído e testado no Windows. Veja [Pré-requisitos](#pré-requisitos).
+
+**A busca nas conversas é a mesma do Recall?**
+É. O [Recall](https://github.com/obrenoalvim/recall) é a mesma busca num app pequeno e separado, para quem só quer buscar nas sessões. O Hub inclui a busca a partir da v0.6.0, na caixa de busca da barra lateral.
 
 **Por que só quatro painéis?**
 Por design, pra manter o layout legível.
