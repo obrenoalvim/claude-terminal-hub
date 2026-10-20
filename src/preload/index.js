@@ -5,6 +5,7 @@ contextBridge.exposeInMainWorld('api', {
   deleteSession: (id) => ipcRenderer.invoke('sessions:delete', id),
   renameSession: (id, name) => ipcRenderer.invoke('sessions:rename', id, name),
   pinSession: (id, pinned) => ipcRenderer.invoke('sessions:pin', id, pinned),
+  searchContent: (query) => ipcRenderer.invoke('sessions:search', query),
   logError: (message) => ipcRenderer.send('renderer:error', message),
   setLanguage: (lang) => ipcRenderer.send('settings:language', lang),
 

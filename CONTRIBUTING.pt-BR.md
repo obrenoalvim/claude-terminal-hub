@@ -17,6 +17,10 @@ Comente pedindo pra ser designado antes de começar a trabalhar. Espere a confir
 - Referencie a issue que fecha (`closes #123`)
 - Nunca dê force-push na branch do PR, isso quebra o re-review. Suba commits novos, eles são squashados no merge.
 
+## Testes
+
+Rode `npm test` antes de subir. O índice de busca em `src/main/search` e o `src/shared/text.ts` têm testes unitários em `tests/search`, adicione um quando mudar algum deles.
+
 ## Reviews
 
 Seja direto, não duro. Use comentários inline pra sugestões específicas. Se o feedback já foi dado, não repita, um joinha já confirma.

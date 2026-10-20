@@ -17,6 +17,10 @@ Comment asking to be assigned before you start working. Wait for confirmation. O
 - Reference the issue it closes (`closes #123`)
 - Never force-push to a PR branch, it breaks re-review. Push new commits instead, they get squashed on merge.
 
+## Tests
+
+Run `npm test` before you push. The search index in `src/main/search` and `src/shared/text.ts` has unit tests under `tests/search`, add one when you change them.
+
 ## Reviews
 
 Be direct, not harsh. Use inline comments for specific suggestions. If feedback was already given, don't repeat it, a thumbs-up is enough to agree.

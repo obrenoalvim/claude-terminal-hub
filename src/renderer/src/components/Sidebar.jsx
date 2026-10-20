@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import Highlight from './Highlight.jsx';
 
 const SHELL_CHOICES = [
   { key: 'powershell', label: 'shell.powershell' },
@@ -6,6 +7,9 @@ const SHELL_CHOICES = [
   { key: 'gitbash', label: 'shell.gitbash' },
   { key: 'wsl', label: 'shell.wsl' },
 ];
+
+const MIN_CONTENT_QUERY = 2;
+const CONTENT_DEBOUNCE_MS = 250;
 
 function timeAgo(ms, t) {
   const diff = Date.now() - ms;
@@ -26,6 +30,7 @@ export default function Sidebar({ collapsed, onToggleCollapse, onOpenSession, op
   const [confirmDelete, setConfirmDelete] = useState(null); // session pending delete
   const [renamingId, setRenamingId] = useState(null);
   const [renameValue, setRenameValue] = useState('');
+  const [content, setContent] = useState(null); // { query, terms, results }
 
   const load = () => {
     setSessions(null);
@@ -70,6 +75,31 @@ export default function Sidebar({ collapsed, onToggleCollapse, onOpenSession, op
     window.addEventListener('click', close);
     return () => window.removeEventListener('click', close);
   }, [contextMenu]);
+
+  const trimmedQuery = query.trim();
+  const contentActive = trimmedQuery.length >= MIN_CONTENT_QUERY;
+  const contentReady = contentActive && content?.query === trimmedQuery;
+
+  useEffect(() => {
+    if (!contentActive) return undefined;
+    let cancelled = false;
+    const timer = setTimeout(() => {
+      window.api
+        .searchContent(trimmedQuery)
+        .then((res) => {
+          if (!cancelled) setContent({ query: trimmedQuery, terms: res.terms, results: res.results });
+        })
+        .catch(() => {
+          if (!cancelled) setContent({ query: trimmedQuery, terms: [], results: [] });
+        });
+    }, CONTENT_DEBOUNCE_MS);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [contentActive, trimmedQuery]);
+
+  const sessionsById = useMemo(() => new Map((sessions || []).map((s) => [s.id, s])), [sessions]);
 
   const filtered = useMemo(() => {
     if (!sessions) return [];
@@ -196,6 +226,50 @@ export default function Sidebar({ collapsed, onToggleCollapse, onOpenSession, op
             </div>
           );
         })}
+
+        {contentActive && (
+          <>
+            <div className="sidebar-section-label">{t('sidebar.inConversations')}</div>
+            {!contentReady && <div className="session-empty">{t('sidebar.searching')}</div>}
+            {contentReady && content.results.filter((r) => r.session.cwd).length === 0 && (
+              <div className="session-empty">{t('sidebar.noContentMatch')}</div>
+            )}
+            {contentReady &&
+              content.results
+                .filter((r) => r.session.cwd)
+                .map(({ session, hits, totalHits }) => {
+                  const known = sessionsById.get(session.id);
+                  const target = known || {
+                    id: session.id,
+                    cwd: session.cwd,
+                    project: session.project,
+                    title: session.title,
+                    preview: null,
+                    mtime: Date.parse(session.endedAt) || 0,
+                    pinned: false,
+                  };
+                  const isOpen = openSessionIds?.has(session.id);
+                  return (
+                    <div
+                      key={session.id}
+                      className={`content-hit${canOpen || isOpen ? '' : ' disabled'}`}
+                      onClick={() => (canOpen || isOpen) && onOpenSession(target)}
+                    >
+                      <div className="session-title">{known?.title || session.title}</div>
+                      {hits[0] && (
+                        <div className="content-hit-snippet">
+                          <Highlight text={hits[0].snippet} terms={content.terms} />
+                        </div>
+                      )}
+                      <div className="content-hit-meta">
+                        <span title={session.cwd}>{session.project}</span>
+                        <span>{totalHits === 1 ? t('sidebar.matchesOne') : t('sidebar.matches', { n: totalHits })}</span>
+                      </div>
+                    </div>
+                  );
+                })}
+          </>
+        )}
       </div>
 
       {contextMenu && (

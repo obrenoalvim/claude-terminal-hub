@@ -3,6 +3,7 @@ import { app, BrowserWindow, dialog, ipcMain } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log/main';
 import { listSessions, deleteSession, renameSession, pinSession } from './sessions.js';
+import { getStore } from './search/store';
 import { startPty, writeToPty, resizePty, killPty, killAllPtys } from './pty-manager.js';
 import { translate, DEFAULT_LANG } from '../shared/i18n.js';
 
@@ -47,6 +48,9 @@ function createWindow() {
   ipcMain.handle('sessions:delete', (event, id) => deleteSession(id));
   ipcMain.handle('sessions:rename', (event, id, name) => renameSession(id, name));
   ipcMain.handle('sessions:pin', (event, id, pinned) => pinSession(id, pinned));
+  ipcMain.handle('sessions:search', (event, query) =>
+    getStore().search(typeof query === 'string' ? query : '', { limit: 12 })
+  );
   ipcMain.on('renderer:error', (event, message) => log.error('[renderer]', message));
   ipcMain.on('settings:language', (event, lang) => { currentLang = lang; });
   ipcMain.handle('update:check', () => {
@@ -149,6 +153,7 @@ const UPDATE_CHECK_INTERVAL_MS = 4 * 60 * 60 * 1000;
 
 app.whenReady().then(() => {
   log.info(`Claude Terminal Hub ${app.getVersion()} starting`);
+  getStore().refresh(true).catch((err) => log.error('[search] initial index failed', err));
   createWindow();
   if (app.isPackaged) {
     autoUpdater.checkForUpdates();

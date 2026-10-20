@@ -10,6 +10,11 @@ export default {
   'sidebar.pickShell': 'Escolher shell',
   'sidebar.searchPlaceholder': 'Buscar sessão…',
   'sidebar.recentSessions': 'Sessões recentes',
+  'sidebar.inConversations': 'Nas conversas',
+  'sidebar.searching': 'Buscando nas conversas…',
+  'sidebar.noContentMatch': 'Nenhuma conversa menciona isso.',
+  'sidebar.matches': '{n} resultados',
+  'sidebar.matchesOne': '1 resultado',
 
   'shell.powershell': 'PowerShell',
   'shell.cmd': 'Prompt (cmd)',

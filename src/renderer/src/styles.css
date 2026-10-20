@@ -374,6 +374,41 @@ html, body, #root {
   color: var(--text-faint);
 }
 
+.session-list .sidebar-section-label { margin: 0 -10px; }
+
+.content-hit {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+.content-hit:hover { background: var(--panel-2); border-color: var(--border); }
+.content-hit.disabled { opacity: 0.35; cursor: not-allowed; }
+.content-hit-snippet {
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--text-dim);
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.content-hit-snippet mark {
+  background: var(--accent-soft);
+  color: var(--text);
+  border-radius: 3px;
+}
+.content-hit-meta {
+  display: flex;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--text-faint);
+}
+
 .session-list {
   flex: 1;
   overflow-y: auto;
