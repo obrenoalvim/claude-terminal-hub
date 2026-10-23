@@ -16,7 +16,7 @@ Resume any session in the right folder with one click, in up to four real termin
 
 **English** · [Português](README.pt.md)
 
-[Features](#features) · [Quick start](#quick-start) · [Shortcuts](#keyboard-shortcuts) · [Requirements](#requirements) · [Architecture](#architecture) · [FAQ](#faq)
+[Features](#features) · [Quick start](#quick-start) · [Shortcuts](#keyboard-shortcuts) · [Requirements](#requirements) · [Architecture](#architecture) · [FAQ](#faq) · [Landing page](https://claude-terminal-hub.vercel.app)
 
 </div>
 

@@ -16,7 +16,7 @@ Retome qualquer sessão na pasta certa com um clique, em até quatro terminais d
 
 [English](README.md) · **Português**
 
-[Funcionalidades](#funcionalidades) · [Início rápido](#início-rápido) · [Atalhos](#atalhos-de-teclado) · [Pré-requisitos](#pré-requisitos) · [Arquitetura](#arquitetura) · [Perguntas frequentes](#perguntas-frequentes)
+[Funcionalidades](#funcionalidades) · [Início rápido](#início-rápido) · [Atalhos](#atalhos-de-teclado) · [Pré-requisitos](#pré-requisitos) · [Arquitetura](#arquitetura) · [Perguntas frequentes](#perguntas-frequentes) · [Site](https://claude-terminal-hub.vercel.app/pt-br/)
 
 </div>
 
